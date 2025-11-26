@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build:
@@ -13,21 +11,4 @@ services:
       - ./.env
     environment:
       - DEBUG=True
-      - DATABASE_URL=postgres://biblioshare:biblioshare@db:5432/biblioshare
-    depends_on:
-      - db
-
-  db:
-    image: postgis/postgis:15-3.3
-    environment:
-      POSTGRES_DB: biblioshare
-      POSTGRES_USER: biblioshare
-      POSTGRES_PASSWORD: biblioshare
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-volumes:
-  postgres_data:
 
