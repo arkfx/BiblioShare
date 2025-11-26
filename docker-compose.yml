@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./biblioshare-web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./biblioshare-web:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgres://biblioshare:biblioshare@db:5432/biblioshare
+    depends_on:
+      - db
+
+  db:
+    image: postgis/postgis:15-3.3
+    environment:
+      POSTGRES_DB: biblioshare
+      POSTGRES_USER: biblioshare
+      POSTGRES_PASSWORD: biblioshare
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+

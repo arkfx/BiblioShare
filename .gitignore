@@ -1,1 +1,16 @@
 old/
+__pycache__/
+*.py[cod]
+*.sqlite3
+biblioshare-web/db.sqlite3
+.env
+.env.*
+venv/
+biblioshare-web/media/
+!biblioshare-web/media/.gitkeep
+node_modules/
+biblioshare-mobile/www/
+dist/
+www/
+biblioshare-web/staticfiles/
+/docs/

@@ -1,0 +1,7 @@
+{
+  "name": "biblioshare-mobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

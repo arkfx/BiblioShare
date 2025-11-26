@@ -1,0 +1,36 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Transações</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-segment value="todas" class="ion-margin-bottom">
+    <ion-segment-button value="todas">
+      <ion-label>Todas</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="pendentes">
+      <ion-label>Pendentes</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="ativas">
+      <ion-label>Ativas</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <ion-list>
+    <ion-item *ngFor="let transacao of transacoes">
+      <ion-label>
+        <h2>{{ transacao.titulo }}</h2>
+        <p>Tipo: {{ transacao.tipo }}</p>
+        <ion-badge color="tertiary">{{ transacao.status }}</ion-badge>
+      </ion-label>
+      <ion-button slot="end" fill="outline" color="primary">
+        Ações
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <ion-text color="medium">
+    <p>Fluxos de solicitação serão conectados ao backend na Fase 5.</p>
+  </ion-text>
+</ion-content>

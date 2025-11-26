@@ -1,0 +1,30 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Meus livros</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-button expand="block" color="success" routerLink="/busca">
+    Adicionar novo livro
+  </ion-button>
+
+  <ion-list>
+    <ion-list-header>
+      <ion-label>Inventário pessoal</ion-label>
+    </ion-list-header>
+
+    <ion-item *ngFor="let livro of livrosExemplo">
+      <ion-label>
+        <h2>{{ livro.titulo }}</h2>
+        <p>Modalidade: {{ livro.modalidade }}</p>
+        <ion-badge [color]="livro.disponibilidade === 'Disponível' ? 'success' : 'warning'">
+          {{ livro.disponibilidade }}
+        </ion-badge>
+      </ion-label>
+      <ion-button slot="end" fill="clear" color="primary">
+        Detalhes
+      </ion-button>
+    </ion-item>
+  </ion-list>
+</ion-content>
