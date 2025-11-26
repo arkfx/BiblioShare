@@ -11,4 +11,15 @@ services:
       - ./.env
     environment:
       - DEBUG=True
+  migrations:
+    build:
+      context: ./biblioshare-web
+    command: >
+      sh -c "python manage.py makemigrations && python manage.py migrate"
+    volumes:
+      - ./biblioshare-web:/app
+    env_file:
+      - ./.env
+    environment:
+      - DEBUG=True
 
