@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { Livro } from '../modelos/livros';
 
 @Injectable({
   providedIn: 'root',
@@ -31,6 +32,10 @@ export class ApiService {
   remover<T>(caminho: string): Observable<T> {
     const url = this.montarUrl(caminho);
     return this.http.delete<T>(url);
+  }
+
+  buscarLivros(parametros?: Record<string, string | number | boolean>): Observable<Livro[]> {
+    return this.obter<Livro[]>('livros/buscar/', parametros);
   }
 
   private montarUrl(caminho: string): string {

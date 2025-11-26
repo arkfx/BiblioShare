@@ -1,12 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Case, IntegerField, Value, When
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, FormView, ListView, UpdateView
+from django.views.generic import CreateView, FormView, ListView, TemplateView, UpdateView
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .filters import LivroFiltro
 from .forms import ListaDesejoForm, LivroForm
 from .models import ListaDesejo, Livro
 from .serializers import (
@@ -49,6 +51,27 @@ class LivroBuscarIsbnAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
         return Response(dados, status=status.HTTP_200_OK)
+
+
+class LivroBuscaAPIView(generics.ListAPIView):
+    serializer_class = LivroSerializer
+    permission_classes = [permissions.AllowAny]
+    filterset_class = LivroFiltro
+
+    def get_queryset(self):
+        queryset = Livro.objects.filter(disponivel=True)
+        if self.request.user.is_authenticated and self.request.user.cidade:
+            cidade = self.request.user.cidade.strip()
+            if cidade:
+                queryset = queryset.annotate(
+                    prioridade=Case(
+                        When(dono__cidade__iexact=cidade, then=Value(0)),
+                        default=Value(1),
+                        output_field=IntegerField(),
+                    )
+                ).order_by('prioridade', '-criado_em')
+                return queryset
+        return queryset.order_by('-criado_em')
 
 
 class ListaDesejosListCreateAPIView(generics.ListCreateAPIView):
@@ -140,4 +163,52 @@ class ListaDesejosView(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         contexto = super().get_context_data(**kwargs)
         contexto['itens'] = ListaDesejo.objects.filter(usuario=self.request.user).order_by('-criado_em')
+        return contexto
+
+
+class BuscarLivrosView(ListView):
+    template_name = 'livros/buscar.html'
+    context_object_name = 'livros'
+    paginate_by = 12
+
+    def get_queryset(self):
+        queryset = Livro.objects.filter(disponivel=True)
+        self.filtro = LivroFiltro(self.request.GET or None, queryset=queryset)
+        return self.filtro.qs
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        parametros = self.request.GET.copy()
+        if 'page' in parametros:
+            parametros.pop('page')
+        contexto['filtro'] = self.filtro
+        contexto['modalidades_opcoes'] = Livro.Modalidades.choices
+        contexto['ordenacoes'] = LivroFiltro.ORDENACOES
+        contexto['parametros_sem_pagina'] = parametros.urlencode()
+        return contexto
+
+
+class VitrineLivrosView(TemplateView):
+    template_name = 'livros/vitrine.html'
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        base_queryset = Livro.objects.filter(disponivel=True)
+        filtro = LivroFiltro(self.request.GET or None, queryset=base_queryset)
+        livros_filtrados = filtro.qs
+        cidade_usuario = ''
+        if self.request.user.is_authenticated and self.request.user.cidade:
+            cidade_usuario = self.request.user.cidade.strip()
+        if cidade_usuario:
+            livros_proximos = livros_filtrados.filter(dono__cidade__iexact=cidade_usuario)
+            livros_outros = livros_filtrados.exclude(dono__cidade__iexact=cidade_usuario)
+        else:
+            livros_proximos = Livro.objects.none()
+            livros_outros = livros_filtrados
+        contexto['filtro'] = filtro
+        contexto['modalidades_opcoes'] = Livro.Modalidades.choices
+        contexto['ordenacoes'] = LivroFiltro.ORDENACOES
+        contexto['livros_proximos'] = livros_proximos
+        contexto['livros_outros'] = livros_outros
+        contexto['cidade_usuario'] = cidade_usuario
         return contexto

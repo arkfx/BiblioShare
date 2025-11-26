@@ -1,0 +1,22 @@
+.estado {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.botoes-filtros {
+  ion-button + ion-button {
+    margin-top: 0.5rem;
+  }
+}
+
+.texto-menor {
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+}
+

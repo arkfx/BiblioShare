@@ -10,12 +10,22 @@ class LivroSerializer(serializers.ModelSerializer):
         child=serializers.ChoiceField(choices=Livro.Modalidades.choices),
         allow_empty=False,
     )
+    dono_cidade = serializers.CharField(
+        source='dono.cidade',
+        read_only=True,
+    )
+    dono_estado = serializers.CharField(
+        source='dono.estado',
+        read_only=True,
+    )
 
     class Meta:
         model = Livro
         fields = (
             'id',
             'dono',
+             'dono_cidade',
+             'dono_estado',
             'isbn',
             'titulo',
             'autor',
@@ -30,7 +40,14 @@ class LivroSerializer(serializers.ModelSerializer):
             'criado_em',
             'atualizado_em',
         )
-        read_only_fields = ('id', 'dono', 'criado_em', 'atualizado_em')
+        read_only_fields = (
+            'id',
+            'dono',
+            'dono_cidade',
+            'dono_estado',
+            'criado_em',
+            'atualizado_em',
+        )
 
     def validate(self, attrs):
         modalidades: List[str] = attrs.get('modalidades', [])

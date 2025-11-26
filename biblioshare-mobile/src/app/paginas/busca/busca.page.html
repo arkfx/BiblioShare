@@ -4,35 +4,102 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-item lines="full">
-    <ion-label position="floating">Título, autor ou ISBN</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="buscarLivros($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-  <ion-chip *ngFor="let modalidade of modalidades" color="medium" outline="true">
-    <ion-label>{{ modalidade }}</ion-label>
-  </ion-chip>
+  <form (ngSubmit)="buscarLivros()" class="ion-padding-bottom">
+    <ion-list lines="full">
+      <ion-item>
+        <ion-label position="stacked">Título, autor ou ISBN</ion-label>
+        <ion-input
+          type="text"
+          name="q"
+          [(ngModel)]="filtros.q"
+          placeholder="Ex.: Big Data"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Modalidade</ion-label>
+        <ion-select name="modalidade" [(ngModel)]="filtros.modalidade" interface="popover">
+          <ion-select-option
+            *ngFor="let modalidade of modalidades"
+            [value]="modalidade.valor"
+          >
+            {{ modalidade.label }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Cidade</ion-label>
+        <ion-input
+          type="text"
+          name="cidade"
+          [(ngModel)]="filtros.cidade"
+          placeholder="Onde você deseja buscar?"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Ordenação</ion-label>
+        <ion-select name="ordenacao" [(ngModel)]="filtros.ordenacao" interface="popover">
+          <ion-select-option
+            *ngFor="let ordenacao of ordenacoes"
+            [value]="ordenacao.valor"
+          >
+            {{ ordenacao.label }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-list>
+    <div class="botoes-filtros ion-padding-horizontal ion-padding-top">
+      <ion-button expand="block" type="submit">
+        Buscar
+      </ion-button>
+      <ion-button expand="block" fill="clear" color="medium" type="button" (click)="limparFiltros()">
+        Limpar filtros
+      </ion-button>
+    </div>
+  </form>
 
-  <ion-list class="ion-margin-top">
-    <ion-list-header>
-      <ion-label>Resultados recentes</ion-label>
-    </ion-list-header>
-    <ion-item>
+  <div class="estado" *ngIf="carregando">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Carregando resultados...</p>
+  </div>
+
+  <div class="estado erro" *ngIf="!carregando && erroCarregamento">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>Não foi possível carregar os livros. Tente novamente.</p>
+  </div>
+
+  <div class="estado vazio" *ngIf="!carregando && !erroCarregamento && livros.length === 0">
+    <ion-icon name="book-outline"></ion-icon>
+    <p>Nenhum livro encontrado com os filtros informados.</p>
+  </div>
+
+  <ion-list *ngIf="livros.length > 0">
+    <ion-item
+      button="true"
+      detail="false"
+      *ngFor="let livro of livros; trackBy: trackByLivro"
+      (click)="abrirDetalhes(livro)"
+    >
       <ion-label>
-        <h2>Engenharia de Dados Moderna</h2>
-        <p>Bairro: Centro • Modalidade: Empréstimo</p>
-      </ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-label>
-        <h2>Design de Produtos Digitais</h2>
-        <p>Bairro: Savassi • Modalidade: Troca</p>
+        <h2>{{ livro.titulo }}</h2>
+        <p>{{ livro.autor || 'Autor não informado' }}</p>
+        <p class="texto-menor">
+          Cidade: {{ livro.dono_cidade || 'Não informada' }}
+        </p>
+        <p class="texto-menor">
+          Modalidades:
+          <ng-container *ngIf="livro.modalidades?.length; else semModalidade">
+            <ng-container *ngFor="let modalidade of livro.modalidades; let ultimo = last">
+              {{ rotuloModalidade(modalidade) }}<span *ngIf="!ultimo"> · </span>
+            </ng-container>
+          </ng-container>
+          <ng-template #semModalidade>Não informado</ng-template>
+        </p>
       </ion-label>
     </ion-item>
   </ion-list>
-
-  <ion-text color="medium">
-    <p>Integração com filtros e mapa chegará na Fase 4.</p>
-  </ion-text>
 </ion-content>

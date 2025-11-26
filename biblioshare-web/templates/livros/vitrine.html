@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Vitrine local · BiblioShare{% endblock %}
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+  <div>
+    <h1 class="h3 mb-1">Vitrine colaborativa</h1>
+    <p class="text-muted mb-0">
+      {% if cidade_usuario %}
+        Destaque para livros disponíveis em {{ cidade_usuario }} e outras regiões.
+      {% else %}
+        Explore livros oferecidos pela comunidade em diversas cidades.
+      {% endif %}
+    </p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'livros_web:buscar' %}">Ir para a busca avançada</a>
+</div>
+
+<form method="get" class="row g-3 align-items-end mb-4">
+  <div class="col-12 col-md-4">
+    <label class="form-label">Título, autor ou ISBN</label>
+    <input
+      type="text"
+      name="q"
+      value="{{ request.GET.q }}"
+      class="form-control"
+      placeholder="Digite um termo de busca"
+    >
+  </div>
+  <div class="col-12 col-sm-6 col-md-3">
+    <label class="form-label">Modalidade</label>
+    <select class="form-select" name="modalidade">
+      <option value="">Todas</option>
+      {% for valor,label in modalidades_opcoes %}
+        <option value="{{ valor }}" {% if request.GET.modalidade == valor %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-12 col-sm-6 col-md-3">
+    <label class="form-label">Cidade</label>
+    <input
+      type="text"
+      name="cidade"
+      value="{{ request.GET.cidade }}"
+      class="form-control"
+      placeholder="Filtrar por cidade"
+    >
+  </div>
+  <div class="col-12 col-md-2">
+    <label class="form-label">Ordenação</label>
+    <select class="form-select" name="ordenacao">
+      <option value="">Mais recentes</option>
+      {% for valor,label in ordenacoes %}
+        <option value="{{ valor }}" {% if request.GET.ordenacao == valor %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-12 col-sm-auto">
+    <button class="btn btn-primary w-100" type="submit">Aplicar filtros</button>
+  </div>
+  <div class="col-12 col-sm-auto">
+    <a class="btn btn-outline-secondary w-100" href="{% url 'livros_web:vitrine' %}">Limpar</a>
+  </div>
+</form>
+
+{% if cidade_usuario and livros_proximos %}
+  <section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h5 mb-0">Na sua cidade</h2>
+      <span class="badge bg-dark">{{ livros_proximos|length }} livro(s)</span>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+      {% for livro in livros_proximos %}
+        <div class="col">
+          <div class="card h-100 border-success">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <h3 class="h5 mb-1">{{ livro.titulo }}</h3>
+                  <p class="text-muted mb-0">{{ livro.autor|default:'Autor não informado' }}</p>
+                </div>
+                <span class="badge bg-success">Perto de você</span>
+              </div>
+              <p class="small text-muted mb-2">{{ livro.dono.cidade|default:'Cidade não informada' }}</p>
+              <div class="mb-3">
+                {% for modalidade in livro.modalidades %}
+                  {% for valor,label in modalidades_opcoes %}
+                    {% if valor == modalidade %}
+                      <span class="badge bg-primary me-1 mb-1">{{ label }}</span>
+                    {% endif %}
+                  {% endfor %}
+                {% endfor %}
+              </div>
+              <p class="small text-muted flex-grow-1">{{ livro.sinopse|truncatechars:120|default:'Sem sinopse cadastrada.' }}</p>
+              <div class="mt-3">
+                <a href="{% url 'livros_web:detalhes-livro' livro.pk %}" class="btn btn-outline-primary w-100">
+                  Ver detalhes
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+<section>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h5 mb-0">Outras cidades</h2>
+    <span class="badge bg-secondary">{{ livros_outros|length }} livro(s)</span>
+  </div>
+  {% if livros_outros %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for livro in livros_outros %}
+        <div class="col">
+          <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+              <h3 class="h5 mb-1">{{ livro.titulo }}</h3>
+              <p class="text-muted mb-2">{{ livro.autor|default:'Autor não informado' }}</p>
+              <p class="small mb-2">
+                <strong>Cidade:</strong> {{ livro.dono.cidade|default:'Não informada' }}
+              </p>
+              <div class="mb-3">
+                {% for modalidade in livro.modalidades %}
+                  {% for valor,label in modalidades_opcoes %}
+                    {% if valor == modalidade %}
+                      <span class="badge bg-light text-dark border me-1 mb-1">{{ label }}</span>
+                    {% endif %}
+                  {% endfor %}
+                {% endfor %}
+              </div>
+              <p class="small text-muted flex-grow-1">{{ livro.sinopse|truncatechars:120|default:'Sem sinopse cadastrada.' }}</p>
+              <div class="mt-3">
+                <a href="{% url 'livros_web:detalhes-livro' livro.pk %}" class="btn btn-outline-secondary w-100">
+                  Ver detalhes
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-4">
+      <p class="text-muted mb-0">Não encontramos livros em outras localidades com os filtros aplicados.</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
+
