@@ -5,30 +5,70 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card>
+  <ion-refresher slot="fixed" (ionRefresh)="carregarPerfil($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-card class="ion-margin-bottom">
     <ion-card-header>
-      <ion-avatar>
-        <img src="assets/icon/favicon.png" alt="Avatar do usuário" />
-      </ion-avatar>
-      <ion-card-title>{{ usuario.nome }}</ion-card-title>
-      <ion-card-subtitle>{{ usuario.email }}</ion-card-subtitle>
+      <div class="perfil-header">
+        <ion-avatar *ngIf="usuario?.foto_perfil; else avatarPlaceholder">
+          <img [src]="usuario?.foto_perfil" alt="Foto do usuário" />
+        </ion-avatar>
+        <ng-template #avatarPlaceholder>
+          <ion-avatar class="avatar-placeholder">
+            <span>{{ (usuario?.first_name || usuario?.username || '?') | slice:0:1 | uppercase }}</span>
+          </ion-avatar>
+        </ng-template>
+        <div class="perfil-info">
+          <ion-card-title>{{ usuario?.first_name || usuario?.username || 'Usuário' }}</ion-card-title>
+          <ion-card-subtitle>{{ usuario?.email }}</ion-card-subtitle>
+        </div>
+      </div>
     </ion-card-header>
     <ion-card-content>
       <ion-item lines="none">
-        <ion-label>Bairro</ion-label>
-        <ion-note slot="end">{{ usuario.bairro }}</ion-note>
+        <ion-label>Cidade/Estado</ion-label>
+        <ion-note slot="end">
+          {{ usuario?.cidade || '-' }} / {{ usuario?.estado || '-' }}
+        </ion-note>
       </ion-item>
-      <ion-item lines="none">
-        <ion-label>Livros disponíveis</ion-label>
-        <ion-note slot="end">{{ usuario.livrosDisponiveis }}</ion-note>
-      </ion-item>
-      <ion-button expand="block" color="primary" class="ion-margin-top">
-        Editar perfil
-      </ion-button>
     </ion-card-content>
   </ion-card>
 
-  <ion-text color="medium">
-    <p>Configurações avançadas serão liberadas nas próximas fases.</p>
-  </ion-text>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Atualizar dados</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="formulario" (ngSubmit)="atualizarPerfil()">
+        <ion-item lines="full">
+          <ion-label position="floating">Nome</ion-label>
+          <ion-input formControlName="first_name"></ion-input>
+        </ion-item>
+        <ion-item lines="full" class="ion-margin-top">
+          <ion-label position="floating">Sobrenome</ion-label>
+          <ion-input formControlName="last_name"></ion-input>
+        </ion-item>
+        <ion-item lines="full" class="ion-margin-top">
+          <ion-label position="floating">Cidade</ion-label>
+          <ion-input formControlName="cidade"></ion-input>
+        </ion-item>
+        <ion-item lines="full" class="ion-margin-top">
+          <ion-label position="floating">Estado</ion-label>
+          <ion-input formControlName="estado"></ion-input>
+        </ion-item>
+
+        <ion-button
+          type="submit"
+          color="primary"
+          expand="block"
+          class="ion-margin-top"
+          [disabled]="salvando"
+        >
+          {{ salvando ? 'Salvando...' : 'Salvar' }}
+        </ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
 </ion-content>

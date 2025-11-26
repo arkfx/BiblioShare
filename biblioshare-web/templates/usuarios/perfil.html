@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil · BiblioShare{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex align-items-center">
+          <div class="me-4">
+            {% if request.user.foto_perfil %}
+              <img src="{{ request.user.foto_perfil.url }}" alt="Foto de perfil" class="rounded-circle" width="96" height="96">
+            {% else %}
+              <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 96px; height: 96px;">
+                <span class="fs-3">{{ request.user.first_name|default:request.user.username|slice:":1"|upper }}</span>
+              </div>
+            {% endif %}
+          </div>
+          <div>
+            <h1 class="h4 mb-1">{{ request.user.get_full_name|default:request.user.username }}</h1>
+            <p class="mb-0 text-muted">{{ request.user.email }}</p>
+            {% if request.user.vinculo_verificado %}
+              <span class="badge bg-success mt-2">Vínculo verificado</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Atualizar informações</h2>
+          <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+              <div class="mb-3">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% if field.errors %}
+                  <div class="text-danger small">{{ field.errors|join:', ' }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">Salvar alterações</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

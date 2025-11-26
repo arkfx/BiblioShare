@@ -2,7 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import JsonResponse
-from django.urls import path
+from django.urls import include, path
 
 
 def saude(_):
@@ -11,6 +11,8 @@ def saude(_):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include('usuarios.urls')),
+    path('', include('usuarios.urls_web')),
     path('', saude, name='saude'),
 ]
 

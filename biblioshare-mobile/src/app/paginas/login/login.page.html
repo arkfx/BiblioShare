@@ -11,20 +11,57 @@
       <ion-card-subtitle>Use seu e-mail registrado</ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
-      <ion-item lines="full">
-        <ion-label position="floating">E-mail</ion-label>
-        <ion-input type="email" placeholder="nome@instituicao.br"></ion-input>
-      </ion-item>
-      <ion-item lines="full">
-        <ion-label position="floating">Senha</ion-label>
-        <ion-input type="password"></ion-input>
-      </ion-item>
-      <ion-button expand="block" class="ion-margin-top" color="primary">
-        Continuar
-      </ion-button>
+      <form [formGroup]="formulario" (ngSubmit)="entrar()">
+        <ion-item lines="full">
+          <ion-label position="floating">E-mail</ion-label>
+          <ion-input
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            inputmode="email"
+          ></ion-input>
+        </ion-item>
+        <ion-note
+          color="danger"
+          *ngIf="email?.invalid && (email?.dirty || email?.touched)"
+        >
+          Informe um e-mail válido.
+        </ion-note>
+
+        <ion-item lines="full" class="ion-margin-top">
+          <ion-label position="floating">Senha</ion-label>
+          <ion-input
+            type="password"
+            formControlName="senha"
+            autocomplete="current-password"
+          ></ion-input>
+        </ion-item>
+        <ion-note
+          color="danger"
+          *ngIf="senha?.invalid && (senha?.dirty || senha?.touched)"
+        >
+          A senha deve ter pelo menos 6 caracteres.
+        </ion-note>
+
+        <ion-button
+          expand="block"
+          class="ion-margin-top"
+          color="primary"
+          type="submit"
+          [disabled]="carregando"
+        >
+          {{ carregando ? 'Entrando...' : 'Continuar' }}
+        </ion-button>
+        <ion-button
+          expand="block"
+          fill="clear"
+          color="medium"
+          type="button"
+          (click)="irParaRegistro()"
+        >
+          Criar conta
+        </ion-button>
+      </form>
     </ion-card-content>
   </ion-card>
-  <ion-text color="medium">
-    <p>Fluxo completo será implementado na Fase 2.</p>
-  </ion-text>
 </ion-content>

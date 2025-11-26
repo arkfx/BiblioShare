@@ -403,7 +403,7 @@ python manage.py createsuperuser
 In `usuarios/models.py`:
 
 - Extend `AbstractUser`
-- Add fields: `foto_perfil`, `localizacao_bairro`, `email_institucional`, `vinculo_verificado`
+- Add fields: `foto_perfil`, `cidade`, `estado`, `vinculo_verificado`
 
 ### 2.2 Dependencies
 
@@ -549,7 +549,7 @@ Add to `requirements.txt`:
 django-filter
 ```
 
-No geospatial extensions are required in the MVP; we'll use simple text/location filters (bairro/cidade).
+No geospatial extensions are required in the MVP; usaremos filtros simples baseados em cidade.
 
 ### 4.2 Search Implementation
 
@@ -557,7 +557,7 @@ In `livros/filters.py`:
 
 - Filter by `titulo`, `autor`, `categoria`
 - Filter by `modalidade`
-- Filter by simple location fields (e.g., `localizacao_bairro` or cidade)
+- Filter by simple location fields (e.g., `cidade`)
 - Order by recency (e.g., `criado_em`) or alphabetically
 
 ### 4.3 API Endpoints
@@ -570,7 +570,6 @@ In `livros/filters.py`:
 Query parameters for `/api/livros/buscar/`:
 - `q`: Search term (title/author)
 - `modalidade`: DOACAO, EMPRESTIMO, ALUGUEL, TROCA
-- `bairro`: Neighborhood filter (optional)
 - `cidade`: City filter (optional)
 
 ### 4.4 Web Views
@@ -595,7 +594,7 @@ Use Leaflet.js with marker clustering:
 - `BuscaPage`: Search with filters + list results (sem mapa no MVP; mapa apenas no web)
 
 ### Phase 4 Deliverables
-- [x] Search with basic location filters (bairro/cidade)
+- [x] Search with basic location filters (cidade)
 - [x] Filter by modality and search term
 - [x] Interactive map with Leaflet.js (web)
 - [x] Search screens (web + mobile)
