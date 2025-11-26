@@ -402,7 +402,7 @@ python manage.py createsuperuser
 In `usuarios/models.py`:
 
 - Extend `AbstractUser`
-- Add fields: `foto_perfil`, `localizacao_bairro`, `localizacao_latitude`, `localizacao_longitude`, `email_institucional`, `vinculo_verificado`
+- Add fields: `foto_perfil`, `localizacao_bairro`, `email_institucional`, `vinculo_verificado`
 
 ### 2.2 Dependencies
 
