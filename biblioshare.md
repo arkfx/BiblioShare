@@ -11,7 +11,7 @@ The solution operates in a hybrid ecosystem:
 | Platform | Stack | Role | Focus |
 |----------|-------|------|-------|
 | **Web** | Django + Bootstrap | "Control Tower" | Strategic exploration, bulk inventory management, complex negotiations |
-| **Mobile** | Angular + Ionic | "Field Tool" | Logistics execution, QR handshakes, geolocation, real-time validation |
+| **Mobile** | Angular + Ionic | "Field Tool" | Logistics execution, code-based handshakes, geolocation, real-time validation |
 
 ### Target Users
 
@@ -28,8 +28,6 @@ The solution operates in a hybrid ecosystem:
 - Django 5.x
 - Django REST Framework
 - PostgreSQL (production) / SQLite (local fallback)
-- Django Channels (WebSocket for chat)
-- Celery + Redis (async tasks, notifications)
 
 ### Web Frontend
 - Django Templates
@@ -40,7 +38,7 @@ The solution operates in a hybrid ecosystem:
 ### Mobile
 - Angular 17+
 - Ionic 7+
-- Capacitor (native features: camera, GPS, push notifications)
+- Capacitor (native features: camera, GPS)
 
 ### Infrastructure
 - Docker + Docker Compose
@@ -227,7 +225,7 @@ ionic start biblioshare-mobile blank --type=angular --capacitor
 cd biblioshare-mobile
 
 # Add required Capacitor plugins
-npm install @capacitor/camera @capacitor/geolocation @capacitor/push-notifications
+npm install @capacitor/camera @capacitor/geolocation
 npm install @capawesome/capacitor-mlkit-barcode-scanning
 npx cap sync
 ```
@@ -342,11 +340,6 @@ services:
     ports:
       - "5432:5432"
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-
 volumes:
   postgres_data:
 ```
@@ -367,18 +360,11 @@ DATABASE_URL=
 # Google Books API
 GOOGLE_BOOKS_API_KEY=
 
-# Social Auth
-GOOGLE_OAUTH_CLIENT_ID=
-GOOGLE_OAUTH_CLIENT_SECRET=
-
 # Email (leave empty for console backend)
 EMAIL_HOST=
 EMAIL_PORT=
 EMAIL_HOST_USER=
 EMAIL_HOST_PASSWORD=
-
-# Redis (leave empty for local memory cache)
-REDIS_URL=
 ```
 
 ### 1.10 Initial Migrations
@@ -405,7 +391,7 @@ python manage.py createsuperuser
 
 ### Objectives
 - Implement custom user model
-- Configure social authentication (Google, Facebook)
+- Implement email/senha authentication (sem login social no MVP)
 - Implement JWT authentication for mobile
 - Create login/register views for web
 
@@ -422,8 +408,6 @@ Add to `requirements.txt`:
 
 ```
 djangorestframework-simplejwt
-django-allauth
-dj-rest-auth
 ```
 
 ### 2.3 API Endpoints
@@ -432,8 +416,6 @@ dj-rest-auth
 |--------|----------|-------------|
 | POST | `/api/auth/registro/` | User registration |
 | POST | `/api/auth/login/` | Email/password login |
-| POST | `/api/auth/login/google/` | Google OAuth login |
-| POST | `/api/auth/login/facebook/` | Facebook OAuth login |
 | POST | `/api/auth/token/refresh/` | Refresh JWT token |
 | GET | `/api/auth/perfil/` | Get current user profile |
 | PATCH | `/api/auth/perfil/` | Update user profile |
@@ -449,14 +431,13 @@ dj-rest-auth
 
 ### 2.5 Mobile Screens
 
-- `LoginPage`: Social auth buttons + email/password form
+- `LoginPage`: Email/password form (espaço reservado para futuros botões sociais)
 - `RegistroPage`: Registration form
 - `PerfilPage`: View/edit profile
 
 ### Phase 2 Deliverables
 - [x] Custom user model with location fields
-- [x] JWT authentication for mobile
-- [x] Social authentication (Google, Facebook)
+- [x] Email/senha + JWT authentication
 - [x] Web login/register templates
 - [x] Mobile auth screens
 - [x] Documentation: `docs/FASE_02_AUTENTICACAO.md`
@@ -565,7 +546,7 @@ Add to `requirements.txt`:
 django-filter
 ```
 
-For geospatial queries, we'll use PostgreSQL's earthdistance extension or simple Haversine formula for SQLite compatibility.
+No geospatial extensions are required in the MVP; we'll use simple text/location filters (bairro/cidade).
 
 ### 4.2 Search Implementation
 
@@ -573,8 +554,8 @@ In `livros/filters.py`:
 
 - Filter by `titulo`, `autor`, `categoria`
 - Filter by `modalidade`
-- Filter by distance (using user's coordinates + radius)
-- Order by distance
+- Filter by simple location fields (e.g., `localizacao_bairro` or cidade)
+- Order by recency (e.g., `criado_em`) or alphabetically
 
 ### 4.3 API Endpoints
 
@@ -586,8 +567,8 @@ In `livros/filters.py`:
 Query parameters for `/api/livros/buscar/`:
 - `q`: Search term (title/author)
 - `modalidade`: DOACAO, EMPRESTIMO, ALUGUEL, TROCA
-- `raio`: Distance in km (1, 5, 10, 20)
-- `latitude`, `longitude`: User's location
+- `bairro`: Neighborhood filter (optional)
+- `cidade`: City filter (optional)
 
 ### 4.4 Web Views
 
@@ -608,11 +589,10 @@ Use Leaflet.js with marker clustering:
 
 ### 4.6 Mobile Screens
 
-- `BuscaPage`: Search with filters + list results
-- `MapaPage`: Optional simple map view
+- `BuscaPage`: Search with filters + list results (sem mapa no MVP; mapa apenas no web)
 
 ### Phase 4 Deliverables
-- [x] Georeferenced search with distance ordering
+- [x] Search with basic location filters (bairro/cidade)
 - [x] Filter by modality and search term
 - [x] Interactive map with Leaflet.js (web)
 - [x] Search screens (web + mobile)
@@ -634,7 +614,7 @@ In `transacoes/models.py`:
 
 **Transacao Model Fields:**
 - `tipo`: DOACAO, EMPRESTIMO, ALUGUEL, TROCA
-- `status`: PENDENTE, ACEITA, AGUARDANDO_ENCONTRO, EM_POSSE, DEVOLVIDO, CONCLUIDA, CANCELADA
+- `status`: PENDENTE, ACEITA, EM_POSSE, CONCLUIDA, CANCELADA
 - `solicitante` (FK to Usuario)
 - `dono` (FK to Usuario)
 - `livro_solicitado` (FK to Livro)
@@ -645,7 +625,7 @@ In `transacoes/models.py`:
 - `transacao` (OneToOne to Transacao)
 - `livros_oferecidos` (M2M to Livro)
 - `livros_solicitados` (M2M to Livro)
-- `status`: PENDENTE, ACEITA, RECUSADA, CONTRAPROPOSTA
+- `status`: PENDENTE, ACEITA, RECUSADA
 
 **HistoricoTransacao Model Fields:**
 - `transacao` (FK to Transacao)
@@ -672,10 +652,10 @@ def criar_solicitacao(livro_id, solicitante):
 
 ### 5.3 Cancellation Logic (RF10)
 
-- Check if transaction is in `AGUARDANDO_ENCONTRO` status
-- Deny cancellation for `ALUGUEL` type
-- Return book to `disponivel = True`
-- Notify other party
+- Allow cancellation only while transaction is in `PENDENTE` or `ACEITA` (antes do livro ficar `EM_POSSE`).
+- For `ALUGUEL`, deny cancellation once status is `EM_POSSE`.
+- When cancelling, set `livro.disponivel = True` if it had been reserved.
+- Create in-app notification for the other party.
 
 ### 5.4 API Endpoints
 
@@ -690,7 +670,6 @@ def criar_solicitacao(livro_id, solicitante):
 | POST | `/api/propostas-troca/` | Create barter proposal |
 | POST | `/api/propostas-troca/{id}/aceitar/` | Accept proposal |
 | POST | `/api/propostas-troca/{id}/recusar/` | Reject proposal |
-| POST | `/api/propostas-troca/{id}/contraproposta/` | Counter-proposal |
 
 ### 5.5 Web Views
 
@@ -733,18 +712,13 @@ def criar_solicitacao(livro_id, solicitante):
 ## Phase 6: Contextual Chat (RF09)
 
 ### Objectives
-- Implement real-time chat per transaction
-- Use Django Channels with WebSockets
+- Implement near real-time chat per transaction
+- Use REST API endpoints with periodic polling (sem WebSockets/Channels)
 - Create chat UI for web and mobile
 
 ### 6.1 Dependencies
 
-Add to `requirements.txt`:
-
-```
-channels
-channels-redis
-```
+No new dependencies are required; chat reuses Django REST Framework and the existing database.
 
 ### 6.2 Message Model
 
@@ -757,40 +731,29 @@ In `transacoes/models.py`:
 - `lida` (Boolean)
 - `criado_em`
 
-### 6.3 WebSocket Consumer
+### 6.3 Chat API (REST + polling)
 
-Create `transacoes/consumers.py`:
+Create endpoints em `transacoes/views.py` que:
 
-- Authenticate user via JWT
-- Join room based on transaction ID
-- Broadcast messages to both parties
-- Mark messages as read
+- Autenticam o usuário via JWT/sessão, como nas demais APIs
+- Listam mensagens de uma transação (com paginação)
+- Criam novas mensagens
+- Marcam mensagens como lidas quando apropriado
 
-### 6.4 API Endpoints (Fallback/History)
+### 6.4 API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/transacoes/{id}/mensagens/` | Get message history |
-| POST | `/api/transacoes/{id}/mensagens/` | Send message (REST fallback) |
+| GET | `/api/transacoes/{id}/mensagens/` | Get message history (used by polling) |
+| POST | `/api/transacoes/{id}/mensagens/` | Send message |
 
-### 6.5 WebSocket Route
+### 6.5 Docker & Deployment
 
-```
-ws://localhost:8000/ws/chat/{transacao_id}/
-```
-
-### 6.6 Update Docker Compose
-
-Add Redis service (already included in Phase 1) and update web service to use Daphne:
-
-```yaml
-web:
-  command: daphne -b 0.0.0.0 -p 8000 nucleo.asgi:application
-```
+No Docker or ASGI changes are required for chat; the existing Gunicorn/`runserver` setup is suficiente, pois o chat usa apenas HTTP/REST.
 
 ### Phase 6 Deliverables
 - [x] Message model
-- [x] Django Channels WebSocket consumer
+- [x] REST chat API with polling strategy
 - [x] Chat UI integrated in transaction details (web)
 - [x] Chat UI in transaction details (mobile)
 - [x] Message history persistence
@@ -801,17 +764,13 @@ web:
 ## Phase 7: Handshake & Check-in (RF12, RF13)
 
 ### Objectives
-- Implement QR code generation for handshakes
+- Implement numeric code generation for handshakes
 - Create dual handshake flow for trades
 - Implement arrival check-in
 
 ### 7.1 Dependencies
 
-Add to `requirements.txt`:
-
-```
-qrcode
-```
+Nenhuma dependência externa adicional é necessária; o handshake usa apenas modelos e views Django com códigos numéricos.
 
 ### 7.2 Handshake Model
 
@@ -820,7 +779,7 @@ In `transacoes/models.py`:
 **Handshake Model Fields:**
 - `transacao` (FK to Transacao)
 - `tipo`: ENTREGA, DEVOLUCAO, TROCA_A, TROCA_B
-- `codigo` (UUID, unique)
+- `codigo` (código curto numérico/alfanumérico, unique)
 - `gerador` (FK to Usuario)
 - `escaneador` (FK to Usuario, nullable)
 - `expira_em` (DateTime)
@@ -828,32 +787,32 @@ In `transacoes/models.py`:
 - `latitude`, `longitude` (nullable)
 - `criado_em`, `concluido_em`
 
-### 7.3 QR Code Logic
+### 7.3 Handshake Logic (Numeric Code)
 
-- Generate unique UUID per handshake
-- Set expiration to 5 minutes from generation
-- Encode: `{"transacao_id": X, "handshake_id": Y, "codigo": "UUID"}`
-- On scan: validate not expired, mark as concluded
+- Generate a short random `codigo` for each handshake and store it no modelo.
+- Set expiration to 5 minutes from generation.
+- Mostrar o `codigo` na tela para quem gerou; a outra parte informa esse código manualmente em um formulário.
+- Ao enviar o código, validar se ele pertence à mesma `transacao`, se não expirou e então marcar o handshake como concluído (registrando latitude/longitude se disponíveis).
 
 ### 7.4 Trade Dual Handshake Flow
 
-1. Transaction status: `AGUARDANDO_ENCONTRO`
-2. User A generates QR → User B scans → Handshake A complete
-3. User B generates QR → User A scans → Handshake B complete
-4. Both complete → Transaction status: `CONCLUIDA`
+1. Transaction status: `ACEITA`.
+2. User A generates a handshake code → User B inputs the code → Handshake A complete.
+3. User B generates a handshake code → User A inputs the code → Handshake B complete.
+4. When both are complete → Transaction status: `CONCLUIDA`.
 
 ### 7.5 API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/transacoes/{id}/gerar-handshake/` | Generate QR code |
-| POST | `/api/transacoes/{id}/validar-handshake/` | Validate scanned code |
+| POST | `/api/transacoes/{id}/gerar-handshake/` | Generate numeric handshake code |
+| POST | `/api/transacoes/{id}/validar-handshake/` | Validate informed code |
 | POST | `/api/transacoes/{id}/checkin/` | Send arrival check-in |
 
 ### 7.6 Mobile Screens
 
-- `HandshakePage`: Generate QR / Scan QR interface
-- Integrate camera scanner for QR reading
+- `HandshakePage`: Mostrar código gerado e formulário para digitar o código da outra parte
+- Nenhuma integração de câmera/QR necessária no MVP
 
 ### 7.7 Check-in (RF13)
 
@@ -864,8 +823,8 @@ Simple button "Cheguei no local" that:
 
 ### Phase 7 Deliverables
 - [x] Handshake model with expiration
-- [x] QR code generation
-- [x] QR code validation with expiration check
+- [x] Numeric code generation
+- [x] Code validation with expiration check
 - [x] Dual handshake flow for trades
 - [x] Arrival check-in with GPS
 - [x] Handshake screens (mobile)
@@ -882,26 +841,26 @@ Simple button "Cheguei no local" that:
 
 ### 8.1 Return Logic
 
-**Status Flow for Loans/Rentals:**
-1. `ACEITA` → `AGUARDANDO_ENCONTRO` → `EM_POSSE` (handshake done)
-2. `EM_POSSE` → User initiates return → `AGUARDANDO_DEVOLUCAO`
-3. `AGUARDANDO_DEVOLUCAO` → Return handshake done → `DEVOLVIDO`
-4. Book returns to `disponivel = True`
+**Status Flow for Loans/Rentals (simplified):**
+1. `PENDENTE` → `ACEITA` quando o dono aceita a solicitação.
+2. `ACEITA` → (handshake de ENTREGA concluído) → `EM_POSSE` (livro com o solicitante).
+3. `EM_POSSE` → (handshake de DEVOLUCAO concluído) → `CONCLUIDA`.
+4. Quando a transação passa para `CONCLUIDA` (em empréstimos/aluguéis), o livro volta para `disponivel = True`.
 
 ### 8.2 API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/transacoes/{id}/iniciar-devolucao/` | Start return process |
-| POST | `/api/transacoes/{id}/gerar-handshake-devolucao/` | Generate return QR |
-| POST | `/api/transacoes/{id}/validar-handshake-devolucao/` | Validate return |
+| POST | `/api/transacoes/{id}/gerar-handshake-devolucao/` | Generate return handshake code |
+| POST | `/api/transacoes/{id}/validar-handshake-devolucao/` | Validate return code |
 
 ### 8.3 Return Handshake Flow
 
 1. Borrower initiates return
-2. Borrower generates QR
-3. Owner scans QR
-4. Book marked as returned and available
+2. Borrower generates handshake code of type `DEVOLUCAO`
+3. Owner inputs this code to confirm return
+4. Transaction marked as `CONCLUIDA` and book marked as available novamente
 
 ### 8.4 Deadline Display
 
@@ -921,20 +880,12 @@ Simple button "Cheguei no local" that:
 ## Phase 9: Notification System (RF16)
 
 ### Objectives
-- Implement push notifications (mobile)
-- Implement email notifications
-- Implement in-app notifications (web)
-- Create notification preferences
+- Implement in-app notifications (web + mobile)
+- Create basic notification preferences
 
 ### 9.1 Dependencies
 
-Add to `requirements.txt`:
-
-```
-celery
-firebase-admin
-django-celery-beat
-```
+No new backend dependencies are required; notifications reuse Django and Django REST Framework.
 
 ### 9.2 Notification Model
 
@@ -942,40 +893,33 @@ In `notificacoes/models.py`:
 
 **Notificacao Model Fields:**
 - `usuario` (FK to Usuario)
-- `tipo`: SOLICITACAO, PROPOSTA, MENSAGEM, LEMBRETE, CHECKIN, etc.
+- `tipo`: SOLICITACAO, PROPOSTA, MENSAGEM, CANCELAMENTO, etc.
 - `titulo`, `mensagem`
-- `dados` (JSONField for deep linking)
+- `dados` (JSONField for deep linking/navigation metadata)
 - `lida` (Boolean)
 - `criado_em`
 
 **PreferenciasNotificacao Model Fields:**
 - `usuario` (OneToOne to Usuario)
-- `push_ativado` (Boolean)
-- `email_ativado` (Boolean)
-- `lembrete_3_dias` (Boolean)
-- `lembrete_no_dia` (Boolean)
+- `receber_notificacoes` (Boolean)
 
 ### 9.3 Notification Events
 
-| Event | Push | In-App | Email |
-|-------|------|--------|-------|
-| New solicitation received | ✅ | ✅ | ✅ |
-| Barter proposal received | ✅ | ✅ | ✅ |
-| Solicitation accepted/rejected | ✅ | ✅ | ❌ |
-| New chat message | ✅ | ✅ | ❌ |
-| Return reminder (3 days) | ✅ | ❌ | ✅ |
-| Return reminder (same day) | ✅ | ✅ | ✅ |
-| Return deadline expired | ✅ | ✅ | ✅ |
-| Transaction cancelled | ✅ | ✅ | ❌ |
-| Other party check-in | ✅ | ❌ | ❌ |
+| Event | In-App |
+|-------|--------|
+| New solicitation received | ✅ |
+| Barter proposal received | ✅ |
+| Solicitation accepted/rejected | ✅ |
+| New chat message | ✅ |
+| Transaction cancelled | ✅ |
 
-### 9.4 Celery Tasks
+### 9.4 Notification Helpers
 
-Create `notificacoes/tasks.py`:
+Create `notificacoes/services.py`:
 
-- `enviar_push_notification(usuario_id, titulo, mensagem, dados)`
-- `enviar_email_notification(usuario_id, template, contexto)`
-- `verificar_lembretes_devolucao()` (periodic task)
+- `criar_notificacao(usuario_id, tipo, titulo, mensagem, dados=None)`
+
+These helpers are called synchronously inside the main business flows (solicitações, propostas, chat, cancelamentos).
 
 ### 9.5 API Endpoints
 
@@ -986,55 +930,12 @@ Create `notificacoes/tasks.py`:
 | POST | `/api/notificacoes/marcar-todas-lidas/` | Mark all as read |
 | GET | `/api/notificacoes/preferencias/` | Get preferences |
 | PATCH | `/api/notificacoes/preferencias/` | Update preferences |
-| POST | `/api/notificacoes/registrar-dispositivo/` | Register FCM token |
-
-### 9.6 Firebase Setup (Mobile)
-
-Configure Firebase Cloud Messaging in Capacitor:
-
-```typescript
-// src/app/core/services/push.service.ts
-import { PushNotifications } from '@capacitor/push-notifications';
-```
-
-### 9.7 Celery Beat Schedule
-
-```python
-CELERY_BEAT_SCHEDULE = {
-    'verificar-lembretes-devolucao': {
-        'task': 'notificacoes.tasks.verificar_lembretes_devolucao',
-        'schedule': crontab(hour=9, minute=0),  # Every day at 9 AM
-    },
-}
-```
-
-### 9.8 Update Docker Compose
-
-Add Celery worker and beat:
-
-```yaml
-celery:
-  build: .
-  command: celery -A nucleo worker -l info
-  depends_on:
-    - redis
-    - db
-
-celery-beat:
-  build: .
-  command: celery -A nucleo beat -l info
-  depends_on:
-    - redis
-    - db
-```
 
 ### Phase 9 Deliverables
 - [x] Notification model
-- [x] Push notification integration (FCM)
-- [x] Email notification templates
-- [x] In-app notification center (web)
+- [x] In-app notification center (web + mobile)
 - [x] Notification preferences
-- [x] Celery periodic task for reminders
+- [x] Synchronous notification helpers wired into main flows
 - [x] Documentation: `docs/FASE_09_NOTIFICACOES.md`
 
 ---
@@ -1077,12 +978,12 @@ celery-beat:
 | Phase | RFs Covered | Key Features |
 |-------|-------------|--------------|
 | 1 | - | Project setup, Docker, structure |
-| 2 | RF01 | Authentication, social login, JWT |
+| 2 | RF01 | Authentication, email/senha, JWT |
 | 3 | RF02, RF03, RF04 | Books, ISBN scanner, wishlist |
 | 4 | RF05, RF06 | Search, geolocation, map |
 | 5 | RF07, RF08, RF10, RF11 | Transactions, proposals, cancellation |
-| 6 | RF09 | Real-time chat |
-| 7 | RF12, RF13 | QR handshake, check-in |
+| 6 | RF09 | Chat (REST + polling) |
+| 7 | RF12, RF13 | Numeric handshake, check-in |
 | 8 | RF14, RF15 | Return flow |
 | 9 | RF16 | Notifications |
 | 10 | - | Integration, polish, deploy |
@@ -1115,19 +1016,11 @@ djangorestframework>=3.14
 django-cors-headers>=4.3
 django-filter>=23.5
 djangorestframework-simplejwt>=5.3
-django-allauth>=0.60
-dj-rest-auth>=5.0
 dj-database-url>=2.1
 python-dotenv>=1.0
 Pillow>=10.0
 gunicorn>=21.0
 psycopg2-binary>=2.9
-channels>=4.0
-channels-redis>=4.1
-celery>=5.3
-django-celery-beat>=2.5
-firebase-admin>=6.2
-qrcode>=7.4
 requests>=2.31
 ```
 
