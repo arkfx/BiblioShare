@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}BiblioShare · Biblioteca distribuída{% endblock %}
+{% block content %}
+<section class="py-5">
+  <div class="row align-items-center g-4">
+    <div class="col-12 col-lg-6">
+      <p class="text-uppercase text-primary fw-semibold mb-2">Compartilhe conhecimento</p>
+      <h1 class="display-5 fw-bold">Conecte pessoas por meio dos livros que já estão na sua estante.</h1>
+      <p class="lead text-muted mt-3">
+        O BiblioShare transforma cada estudante em uma microfilial colaborativa. Catalogue seus livros, defina
+        modalidades de empréstimo ou troca e descubra títulos raros perto de você.
+      </p>
+      <div class="d-flex flex-column flex-sm-row gap-3 mt-4">
+        <a class="btn btn-primary btn-lg px-4" href="{% url 'usuarios_web:entrar' %}">Entrar</a>
+        <a class="btn btn-outline-primary btn-lg px-4" href="{% url 'usuarios_web:registrar' %}">Criar conta</a>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="bg-dark text-white rounded-4 p-4 shadow-lg">
+        <p class="text-uppercase fw-semibold text-warning mb-2">Fluxo híbrido</p>
+        <p class="mb-0">
+          Web para estratégia, mobile para execução. Use a vitrine online para identificar oportunidades e finalize
+          empréstimos, trocas e entregas com o app Ionic, incluindo checagens presenciais e mão dupla de confirmação.
+        </p>
+        <hr class="my-4 text-white-50">
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2">• Busca geográfica por cidade ou campus</li>
+          <li class="mb-2">• Modalidades: doação, empréstimo, aluguel e troca</li>
+          <li class="mb-0">• Wishlist compartilhada e notificações contextuais</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 border-top">
+  <div class="row g-4">
+    <div class="col-12 col-lg-4">
+      <div class="h-100 p-4 border rounded-4">
+        <div class="mb-3 text-primary fs-3">📚</div>
+        <h2 class="h4">Inventário inteligente</h2>
+        <p class="text-muted mb-0">
+          Cadastre livros com ISBN, fotos e modalidades flexíveis. Controle disponibilidade em tempo real para evitar
+          conflitos.
+        </p>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="h-100 p-4 border rounded-4">
+        <div class="mb-3 text-primary fs-3">🤝</div>
+        <h2 class="h4">Transações seguras</h2>
+        <p class="text-muted mb-0">
+          Solicitações com bloqueio de concorrência, chat contextual e handshakes numéricos nas entregas e devoluções.
+        </p>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="h-100 p-4 border rounded-4">
+        <div class="mb-3 text-primary fs-3">🌍</div>
+        <h2 class="h4">Comunidade local</h2>
+        <p class="text-muted mb-0">
+          Filtre por cidade ou bairro, descubra microcoleções próximas e fortaleça o ecossistema acadêmico regional.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
