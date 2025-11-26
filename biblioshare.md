@@ -172,10 +172,11 @@ biblioshare/
 │   └── ...
 ├── manage.py
 ├── requirements.txt
-├── Dockerfile
 ├── docker-compose.yml
 └── .env.example
 ```
+
+> Nota: o `Dockerfile` agora fica na raiz do repositório (`/Dockerfile`) e copia o conteúdo de `biblioshare-web/` durante o build para manter paridade entre os ambientes local (Docker Desktop) e produção (Cloud Run).
 
 ### 1.3 Settings Configuration
 
@@ -298,10 +299,10 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY biblioshare-web/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY biblioshare-web/ .
 
 RUN python manage.py collectstatic --noinput
 

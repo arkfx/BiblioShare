@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env
+.env.*
+*.md
+*.log
+biblioshare-mobile
+docs
+old
+docker-compose.yml
+docker-compose.yaml
+.cursor
+.cursorignore
+terminals
+
