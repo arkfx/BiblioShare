@@ -56,6 +56,7 @@ The solution operates in a hybrid ecosystem:
 - ✅ Use framework CLI commands for migrations, app setup, and scaffolding
 - ✅ Use framework templates and ready UI components - don't worry about "the Bootstrap look"
 - ✅ Keep codebase minimal but efficient
+- ✅ Always use class-based views
 
 ### Backend Specifics
 - Use environment variables for sensitive configs (database URL, secrets, etc.)
@@ -785,7 +786,6 @@ In `transacoes/models.py`:
 - `escaneador` (FK to Usuario, nullable)
 - `expira_em` (DateTime)
 - `concluido` (Boolean)
-- `latitude`, `longitude` (nullable)
 - `criado_em`, `concluido_em`
 
 ### 7.3 Handshake Logic (Numeric Code)
@@ -793,7 +793,7 @@ In `transacoes/models.py`:
 - Generate a short random `codigo` for each handshake and store it no modelo.
 - Set expiration to 5 minutes from generation.
 - Mostrar o `codigo` na tela para quem gerou; a outra parte informa esse código manualmente em um formulário.
-- Ao enviar o código, validar se ele pertence à mesma `transacao`, se não expirou e então marcar o handshake como concluído (registrando latitude/longitude se disponíveis).
+- Ao enviar o código, validar se ele pertence à mesma `transacao`, se não expirou e então marcar o handshake como concluído.
 
 ### 7.4 Trade Dual Handshake Flow
 
