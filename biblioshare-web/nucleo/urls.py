@@ -12,7 +12,9 @@ def saude(_):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('usuarios.urls')),
+    path('api/', include('livros.urls')),
     path('', include('usuarios.urls_web')),
+    path('', include('livros.urls_web')),
     path('', saude, name='saude'),
 ]
 

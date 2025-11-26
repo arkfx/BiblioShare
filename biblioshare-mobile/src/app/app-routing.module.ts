@@ -21,6 +21,30 @@ const routes: Routes = [
       import('./paginas/meus-livros/meus-livros.module').then((m) => m.MeusLivrosPageModule),
   },
   {
+    path: 'adicionar-livro',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./paginas/adicionar-livro/adicionar-livro.module').then(
+        (m) => m.AdicionarLivroPageModule,
+      ),
+  },
+  {
+    path: 'livros/:id',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./paginas/detalhes-livro/detalhes-livro.module').then(
+        (m) => m.DetalhesLivroPageModule,
+      ),
+  },
+  {
+    path: 'lista-desejos',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./paginas/lista-desejos/lista-desejos.module').then(
+        (m) => m.ListaDesejosPageModule,
+      ),
+  },
+  {
     path: 'busca',
     canActivate: [AuthGuard],
     loadChildren: () =>

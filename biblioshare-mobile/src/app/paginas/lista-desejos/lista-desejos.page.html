@@ -1,0 +1,66 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/meus-livros"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Lista de desejos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="carregarItens($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Adicionar item</ion-card-title>
+      <ion-card-subtitle>Preencha pelo menos um dos campos abaixo</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="formulario" (ngSubmit)="adicionar()">
+        <ion-item>
+          <ion-label position="stacked">Título</ion-label>
+          <ion-input formControlName="titulo"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Autor</ion-label>
+          <ion-input formControlName="autor"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">ISBN</ion-label>
+          <ion-input formControlName="isbn"></ion-input>
+        </ion-item>
+        <ion-button expand="block" class="ion-margin-top" type="submit" [disabled]="salvando">
+          <ion-spinner slot="start" *ngIf="salvando" name="crescent"></ion-spinner>
+          Salvar item
+        </ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-list *ngIf="itens.length">
+    <ion-list-header>
+      <ion-label>Itens salvos</ion-label>
+    </ion-list-header>
+    <ion-item-sliding *ngFor="let item of itens">
+      <ion-item>
+        <ion-label>
+          <h2>{{ item.titulo || 'Título não informado' }}</h2>
+          <p *ngIf="item.autor">Autor: {{ item.autor }}</p>
+          <p *ngIf="item.isbn">ISBN: {{ item.isbn }}</p>
+          <ion-note color="medium">Adicionado em {{ item.criado_em | date: 'short' }}</ion-note>
+        </ion-label>
+      </ion-item>
+      <ion-item-options side="end">
+        <ion-item-option color="danger" (click)="remover(item)">Remover</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <div class="estado-vazio ion-padding ion-text-center" *ngIf="!itens.length && !carregando">
+    <ion-icon name="bookmark-outline" size="large"></ion-icon>
+    <p>Nenhum item salvo ainda.</p>
+  </div>
+</ion-content>
+

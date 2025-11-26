@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Lista de desejos · BiblioShare{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h5 mb-3">Novo item</h1>
+        <p class="text-muted small">Preencha pelo menos um dos campos para identificar o livro desejado.</p>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+          {% for field in form %}
+            <div class="mb-3">
+              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% for error in field.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+          <button type="submit" class="btn btn-primary w-100">Adicionar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h2 class="h5 mb-0">Itens salvos</h2>
+        <p class="text-muted small mb-0">{{ itens|length }} desejo{{ itens|length|pluralize:"s" }}</p>
+      </div>
+    </div>
+    {% if itens %}
+      <div class="list-group shadow-sm">
+        {% for item in itens %}
+          <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              <h3 class="h6 mb-1">{{ item.titulo|default:"Título não informado" }}</h3>
+              <p class="mb-0 text-muted">
+                {% if item.autor %}Autor: {{ item.autor }}{% endif %}
+                {% if item.isbn %}{% if item.autor %} · {% endif %}ISBN: {{ item.isbn }}{% endif %}
+              </p>
+              <small class="text-muted">Adicionado em {{ item.criado_em|date:"d/m/Y H:i" }}</small>
+            </div>
+            <form method="post" class="ms-auto">
+              {% csrf_token %}
+              <input type="hidden" name="remover_id" value="{{ item.id }}">
+              <button type="submit" class="btn btn-outline-danger btn-sm">Remover</button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="border rounded bg-light py-5 text-center">
+        <p class="mb-0">Sua lista está vazia. Adicione novos títulos ao lado.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

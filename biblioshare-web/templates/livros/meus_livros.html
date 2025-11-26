@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Meus livros · BiblioShare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h3 mb-1">Meus livros</h1>
+    <p class="text-muted mb-0">{{ total_livros }} livro{{ total_livros|pluralize:"s" }} cadastrado{{ total_livros|pluralize }}</p>
+  </div>
+  <a class="btn btn-primary" href="{% url 'livros_web:adicionar-livro' %}">Adicionar livro</a>
+</div>
+
+{% if livros %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Modalidades</th>
+          <th>Status</th>
+          <th>Atualizado em</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for livro in livros %}
+          <tr>
+            <td class="fw-semibold">{{ livro.titulo }}</td>
+            <td>
+              {% for modalidade in livro.modalidades %}
+                <span class="badge text-bg-light border me-1">{{ modalidade|title }}</span>
+              {% empty %}
+                <span class="text-muted">-</span>
+              {% endfor %}
+            </td>
+            <td>
+              {% if livro.disponivel %}
+                <span class="badge text-bg-success">Disponível</span>
+              {% else %}
+                <span class="badge text-bg-secondary">Indisponível</span>
+              {% endif %}
+            </td>
+            <td>{{ livro.atualizado_em|date:"d/m/Y H:i" }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'livros_web:detalhes-livro' livro.pk %}">
+                Detalhes
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="text-center py-5 border rounded bg-light">
+    <p class="mb-3">Nenhum livro cadastrado ainda.</p>
+    <a class="btn btn-primary" href="{% url 'livros_web:adicionar-livro' %}">Cadastrar primeiro livro</a>
+  </div>
+{% endif %}
+{% endblock %}
+

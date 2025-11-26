@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ livro.titulo }} · BiblioShare{% endblock %}
+
+{% block content %}
+<div class="mb-4 d-flex justify-content-between align-items-center">
+  <div>
+    <a href="{% url 'livros_web:meus-livros' %}" class="text-decoration-none">&larr; Voltar</a>
+    <h1 class="h4 mt-2 mb-0">{{ livro.titulo }}</h1>
+    <p class="text-muted mb-0">{{ livro.autor|default:"Autor desconhecido" }}</p>
+  </div>
+  <form method="post" onsubmit="return confirm('Deseja remover este livro do inventário?');">
+    {% csrf_token %}
+    <input type="hidden" name="acao_excluir" value="1">
+    <button type="submit" class="btn btn-outline-danger">Remover livro</button>
+  </form>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+      {% endif %}
+      {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+            <div class="form-text">{{ field.help_text }}</div>
+          {% endif %}
+          {% for error in field.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Salvar alterações</button>
+        <a href="{% url 'livros_web:meus-livros' %}" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

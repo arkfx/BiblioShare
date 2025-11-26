@@ -1,0 +1,93 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/meus-livros"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ livro?.titulo || 'Detalhes do livro' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="danger" (click)="remover()">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-progress-bar *ngIf="carregando" type="indeterminate"></ion-progress-bar>
+  <form [formGroup]="formulario" (ngSubmit)="atualizar()" *ngIf="!carregando">
+    <ion-list lines="full">
+      <ion-item>
+        <ion-label position="stacked">ISBN</ion-label>
+        <ion-input formControlName="isbn"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Título *</ion-label>
+        <ion-input formControlName="titulo"></ion-input>
+      </ion-item>
+      <ion-note color="danger" *ngIf="formulario.get('titulo')?.touched && formulario.get('titulo')?.invalid">
+        Informe o título.
+      </ion-note>
+
+      <ion-item>
+        <ion-label position="stacked">Autor</ion-label>
+        <ion-input formControlName="autor"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Editora</ion-label>
+        <ion-input formControlName="editora"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Ano de publicação</ion-label>
+        <ion-input formControlName="ano_publicacao" inputmode="numeric"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">URL da capa</ion-label>
+        <ion-input formControlName="capa_url" type="url"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Sinopse</ion-label>
+        <ion-textarea formControlName="sinopse" autoGrow="true"></ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Modalidades *</ion-label>
+        <ion-select formControlName="modalidades" interface="popover" multiple="true">
+          <ion-select-option *ngFor="let modalidade of modalidades" [value]="modalidade.valor">
+            {{ modalidade.texto }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Valor semanal do aluguel</ion-label>
+        <ion-input formControlName="valor_aluguel_semanal" type="number" min="0" step="0.5"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Prazo do empréstimo (dias)</ion-label>
+        <ion-input formControlName="prazo_emprestimo_dias" type="number" min="1"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none">
+        <ion-label>Disponível</ion-label>
+        <ion-toggle formControlName="disponivel"></ion-toggle>
+      </ion-item>
+    </ion-list>
+
+    <ion-padding>
+      <ion-button expand="block" type="submit" [disabled]="salvando">
+        <ion-spinner slot="start" *ngIf="salvando" name="crescent"></ion-spinner>
+        Salvar alterações
+      </ion-button>
+      <ion-button expand="block" fill="clear" color="medium" (click)="carregarLivro()" type="button">
+        Recarregar dados
+      </ion-button>
+    </ion-padding>
+  </form>
+</ion-content>
+

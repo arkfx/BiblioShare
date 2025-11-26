@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Adicionar livro · BiblioShare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'livros_web:meus-livros' %}" class="text-decoration-none">&larr; Voltar para meus livros</a>
+</div>
+
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h4 mb-4">Adicionar livro</h1>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+          {% for field in form %}
+            <div class="mb-3">
+              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.help_text %}
+                <div class="form-text">{{ field.help_text }}</div>
+              {% endif %}
+              {% for error in field.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+          <button type="submit" class="btn btn-primary">Salvar livro</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card border-0 bg-light">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted mb-3">Dicas rápidas</h2>
+        <ul class="mb-0">
+          <li>Utilize o mesmo ISBN do aplicativo para manter tudo sincronizado.</li>
+          <li>Cadastre todas as modalidades disponíveis para aproveitar as oportunidades.</li>
+          <li>Você pode editar ou remover o livro a qualquer momento.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
