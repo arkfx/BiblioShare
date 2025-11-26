@@ -51,6 +51,7 @@ The solution operates in a hybrid ecosystem:
 ### Code Conventions
 - ❌ Never write emojis in the codebase (except in `.md` files)
 - ❌ No inline comments - document in dedicated `.md` files per phase
+- ❌ NEVER manually write/modify the migrations file, except when explicitly asked by the user.
 - ✅ Adhere to Django's DRY (Don't Repeat Yourself) philosophy
 - ✅ Write all codebase variables, function names, URLs, and UIs in **Brazilian Portuguese**
 - ✅ Use framework CLI commands for migrations, app setup, and scaffolding
