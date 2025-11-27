@@ -1,8 +1,6 @@
 old/
 __pycache__/
 *.py[cod]
-*.sqlite3
-biblioshare-web/db.sqlite3
 .env
 .env.*
 venv/
