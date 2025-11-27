@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, FormView, ListView
 from rest_framework import generics, permissions, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,8 +13,9 @@ from rest_framework.views import APIView
 from livros.models import Livro
 
 from .forms import ProporTrocaForm
-from .models import Transacao
-from .serializers import TransacaoCriarSerializer, TransacaoSerializer
+from .models import Mensagem, Transacao
+from .permissions import EhParticipanteDaTransacao
+from .serializers import MensagemSerializer, TransacaoCriarSerializer, TransacaoSerializer
 from .services import (
     ErroTransacao,
     EstadoInvalidoError,
@@ -86,6 +88,62 @@ class TransacaoRecusarAPIView(TransacaoAcaoBaseAPIView):
 class TransacaoCancelarAPIView(TransacaoAcaoBaseAPIView):
     def executar_acao(self, transacao: Transacao, usuario):
         return cancelar_transacao(transacao, usuario)
+
+
+class MensagemPaginacao(PageNumberPagination):
+    page_size = 50
+    page_size_query_param = 'page_size'
+    max_page_size = 200
+
+
+class MensagensTransacaoAPIView(generics.ListCreateAPIView):
+    serializer_class = MensagemSerializer
+    permission_classes = [permissions.IsAuthenticated, EhParticipanteDaTransacao]
+    pagination_class = MensagemPaginacao
+
+    def get_queryset(self):
+        transacao = self.get_transacao()
+        queryset = (
+            Mensagem.objects.filter(transacao=transacao)
+            .select_related('remetente')
+            .order_by('criado_em')
+        )
+        depois_de = self.request.query_params.get('depois_de')
+        if depois_de is not None:
+            try:
+                depois_de_id = int(depois_de)
+            except (TypeError, ValueError) as erro:
+                raise ValidationError({'depois_de': 'Parâmetro inválido.'}) from erro
+            queryset = queryset.filter(id__gt=depois_de_id)
+        return queryset
+
+    def get_transacao(self):
+        if not hasattr(self, '_transacao_cache'):
+            self._transacao_cache = get_object_or_404(
+                Transacao.objects.select_related('solicitante', 'dono'),
+                pk=self.kwargs['pk'],
+            )
+        return self._transacao_cache
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        self._marcar_mensagens_como_lidas(response.data)
+        return response
+
+    def perform_create(self, serializer):
+        transacao = self.get_transacao()
+        serializer.save(transacao=transacao, remetente=self.request.user)
+
+    def _marcar_mensagens_como_lidas(self, payload):
+        mensagens_payload = payload.get('results', payload) if isinstance(payload, dict) else payload
+        if not isinstance(mensagens_payload, list):
+            return
+        usuario_id = self.request.user.id
+        mensagens_ids = [item['id'] for item in mensagens_payload if item.get('remetente') != usuario_id]
+        if mensagens_ids:
+            Mensagem.objects.filter(id__in=mensagens_ids, lida=False).exclude(remetente_id=usuario_id).update(
+                lida=True
+            )
 
 
 class TransacoesListaView(LoginRequiredMixin, ListView):

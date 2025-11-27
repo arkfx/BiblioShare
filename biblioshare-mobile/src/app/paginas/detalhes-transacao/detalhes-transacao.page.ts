@@ -1,14 +1,16 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   AlertController,
+  IonContent,
   NavController,
   ToastController,
 } from '@ionic/angular';
-import { Subscription } from 'rxjs';
+import { Subscription, interval } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import {
+  MensagemTransacao,
   Transacao,
   TransacaoLivroResumo,
 } from '../../core/modelos/transacoes';
@@ -17,6 +19,7 @@ import {
   AutenticacaoService,
   UsuarioPerfil,
 } from '../../core/services/autenticacao.service';
+import { ChatService } from '../../core/services/chat.service';
 
 type AcaoTransacao = 'aceitar' | 'recusar' | 'cancelar';
 
@@ -26,16 +29,26 @@ type AcaoTransacao = 'aceitar' | 'recusar' | 'cancelar';
   styleUrls: ['./detalhes-transacao.page.scss'],
 })
 export class DetalhesTransacaoPage implements OnDestroy {
+  @ViewChild(IonContent) ionContent?: IonContent;
   transacao?: Transacao;
   carregando = false;
   processando = false;
+  mensagens: MensagemTransacao[] = [];
+  novaMensagem = '';
+  sincronizandoChat = false;
+  enviandoMensagem = false;
+  chatStatus = 'Conectando...';
+  chatErro?: string;
   private readonly transacaoId: number;
   private usuario?: UsuarioPerfil | null;
   private readonly subscriptions = new Subscription();
+  private ultimaMensagemId: number | null = null;
+  private pollingMensagens?: Subscription;
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly apiService: ApiService,
+    private readonly chatService: ChatService,
     private readonly navController: NavController,
     private readonly toastController: ToastController,
     private readonly alertController: AlertController,
@@ -48,6 +61,7 @@ export class DetalhesTransacaoPage implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.encerrarPollingMensagens();
     this.subscriptions.unsubscribe();
   }
 
@@ -58,6 +72,11 @@ export class DetalhesTransacaoPage implements OnDestroy {
     }
     this.garantirPerfil();
     this.buscarTransacao();
+    this.iniciarChat();
+  }
+
+  ionViewWillLeave(): void {
+    this.encerrarPollingMensagens();
   }
 
   buscarTransacao(event?: CustomEvent): void {
@@ -109,6 +128,33 @@ export class DetalhesTransacaoPage implements OnDestroy {
     return this.transacao.livros_solicitados.filter(
       (livro) => livro.id !== this.transacao?.livro_principal.id,
     );
+  }
+
+  get usuarioAtualId(): number | undefined {
+    return this.usuario?.id ?? undefined;
+  }
+
+  enviarMensagem(): void {
+    const conteudo = this.novaMensagem.trim();
+    if (!conteudo || this.enviandoMensagem) {
+      return;
+    }
+    this.enviandoMensagem = true;
+    const envioSub = this.chatService
+      .enviarMensagem(this.transacaoId, conteudo)
+      .pipe(finalize(() => (this.enviandoMensagem = false)))
+      .subscribe({
+        next: (mensagem) => {
+          this.registrarMensagens([mensagem], false);
+          this.novaMensagem = '';
+          this.chatErro = undefined;
+          this.atualizarStatusChat();
+        },
+        error: async () => {
+          await this.exibirToast('Não foi possível enviar a mensagem.');
+        },
+      });
+    this.subscriptions.add(envioSub);
   }
 
   rotuloTipo(tipo: string): string {
@@ -198,6 +244,85 @@ export class DetalhesTransacaoPage implements OnDestroy {
       color: cor,
     });
     await toast.present();
+  }
+
+  private iniciarChat(): void {
+    if (!this.transacaoId) {
+      return;
+    }
+    this.carregarMensagens(false);
+    this.encerrarPollingMensagens();
+    this.pollingMensagens = interval(4000).subscribe(() => this.carregarMensagens(true));
+  }
+
+  private encerrarPollingMensagens(): void {
+    this.pollingMensagens?.unsubscribe();
+    this.pollingMensagens = undefined;
+  }
+
+  private carregarMensagens(incremental: boolean): void {
+    if (!this.transacaoId) {
+      return;
+    }
+    if (this.sincronizandoChat && incremental) {
+      return;
+    }
+    const depoisDe = incremental && this.ultimaMensagemId ? this.ultimaMensagemId : undefined;
+    this.sincronizandoChat = true;
+    const sincronizacaoSub = this.chatService
+      .listarMensagens(this.transacaoId, depoisDe)
+      .pipe(finalize(() => (this.sincronizandoChat = false)))
+      .subscribe({
+        next: (mensagens) => {
+          this.registrarMensagens(mensagens, !incremental);
+          this.chatErro = undefined;
+          if (this.mensagens.length) {
+            this.atualizarStatusChat();
+          } else {
+            this.chatStatus = 'Nenhuma mensagem ainda';
+          }
+        },
+        error: () => {
+          this.chatErro = 'Não foi possível sincronizar o chat.';
+          this.chatStatus = 'Offline';
+        },
+      });
+    this.subscriptions.add(sincronizacaoSub);
+  }
+
+  private registrarMensagens(recebidas: MensagemTransacao[], substituir: boolean): void {
+    if (substituir) {
+      this.mensagens = [];
+    }
+    if (!recebidas.length) {
+      this.atualizarUltimaMensagem();
+      return;
+    }
+    const existentes = new Map(this.mensagens.map((mensagem) => [mensagem.id, mensagem]));
+    recebidas.forEach((mensagem) => existentes.set(mensagem.id, mensagem));
+    this.mensagens = Array.from(existentes.values()).sort((a, b) => a.id - b.id);
+    this.atualizarUltimaMensagem();
+    this.rolarChatParaBase();
+  }
+
+  private atualizarUltimaMensagem(): void {
+    this.ultimaMensagemId = this.mensagens.length
+      ? this.mensagens[this.mensagens.length - 1].id
+      : null;
+  }
+
+  private atualizarStatusChat(): void {
+    const agora = new Date();
+    this.chatStatus = `Atualizado às ${agora.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })}`;
+  }
+
+  private rolarChatParaBase(): void {
+    requestAnimationFrame(() => {
+      this.ionContent?.scrollToBottom(300);
+    });
   }
 }
 

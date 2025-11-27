@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    MensagensTransacaoAPIView,
     TransacaoAceitarAPIView,
     TransacaoCancelarAPIView,
     TransacaoDetailAPIView,
@@ -16,5 +17,6 @@ urlpatterns = [
     path('transacoes/<int:pk>/aceitar/', TransacaoAceitarAPIView.as_view(), name='transacoes-aceitar'),
     path('transacoes/<int:pk>/recusar/', TransacaoRecusarAPIView.as_view(), name='transacoes-recusar'),
     path('transacoes/<int:pk>/cancelar/', TransacaoCancelarAPIView.as_view(), name='transacoes-cancelar'),
+    path('transacoes/<int:pk>/mensagens/', MensagensTransacaoAPIView.as_view(), name='transacoes-mensagens'),
 ]
 

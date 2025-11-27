@@ -120,6 +120,58 @@
         </ion-button>
       </ion-card-content>
     </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <div class="chat-cabecalho">
+          <div>
+            <ion-card-title>Chat da transação</ion-card-title>
+            <ion-card-subtitle class="chat-status">{{ chatStatus }}</ion-card-subtitle>
+          </div>
+          <ion-spinner name="dots" *ngIf="sincronizandoChat"></ion-spinner>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="chat-lista" [class.chat-lista--vazia]="!mensagens.length">
+          <ng-container *ngIf="mensagens.length; else semMensagensMobile">
+            <div
+              *ngFor="let mensagem of mensagens"
+              class="chat-mensagem"
+              [class.chat-mensagem--propria]="mensagem.remetente === usuarioAtualId"
+            >
+              <div class="chat-balao">
+                <p class="chat-texto">{{ mensagem.conteudo }}</p>
+                <small class="chat-meta">
+                  {{ mensagem.remetente_nome }} · {{ mensagem.criado_em | date: 'HH:mm dd/MM' }}
+                </small>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+        <ng-template #semMensagensMobile>
+          <p class="descricao chat-vazia">Nenhuma mensagem ainda.</p>
+        </ng-template>
+        <form class="chat-form" (ngSubmit)="enviarMensagem()">
+          <ion-textarea
+            name="novaMensagem"
+            [(ngModel)]="novaMensagem"
+            placeholder="Digite uma mensagem"
+            [autoGrow]="true"
+            rows="2"
+            maxlength="1000"
+          ></ion-textarea>
+          <ion-button
+            type="submit"
+            expand="block"
+            class="chat-botao"
+            [disabled]="enviandoMensagem || !novaMensagem || !novaMensagem.trim()"
+          >
+            Enviar
+          </ion-button>
+        </form>
+        <p class="chat-erro" *ngIf="chatErro">{{ chatErro }}</p>
+      </ion-card-content>
+    </ion-card>
   </ng-container>
 </ion-content>
 

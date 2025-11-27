@@ -98,3 +98,32 @@ class HistoricoTransacao(models.Model):
 
     def __str__(self):
         return f'{self.transacao_id} · {self.get_status_anterior_display()} → {self.get_status_novo_display()}'
+
+
+class Mensagem(models.Model):
+    transacao = models.ForeignKey(
+        Transacao,
+        on_delete=models.CASCADE,
+        related_name='mensagens',
+        verbose_name='transação',
+    )
+    remetente = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='mensagens_enviadas',
+        verbose_name='remetente',
+    )
+    conteudo = models.TextField('conteúdo')
+    lida = models.BooleanField('lida', default=False)
+    criado_em = models.DateTimeField('criado em', auto_now_add=True)
+
+    class Meta:
+        ordering = ('criado_em',)
+        verbose_name = 'Mensagem'
+        verbose_name_plural = 'Mensagens'
+        indexes = [
+            models.Index(fields=('transacao', 'criado_em')),
+        ]
+
+    def __str__(self):
+        return f'{self.transacao_id} · {self.remetente_id} · {self.criado_em:%d/%m %H:%M}'

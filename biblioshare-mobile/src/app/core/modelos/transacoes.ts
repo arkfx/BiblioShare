@@ -43,4 +43,14 @@ export interface CriarTransacaoPayload {
 
 export interface TransacaoAcaoResposta extends Transacao {}
 
+export interface MensagemTransacao {
+  id: number;
+  transacao: number;
+  remetente: number;
+  remetente_nome: string;
+  conteudo: string;
+  lida: boolean;
+  criado_em: string;
+}
+
 

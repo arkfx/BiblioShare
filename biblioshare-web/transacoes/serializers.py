@@ -5,7 +5,7 @@ from rest_framework.exceptions import PermissionDenied
 from livros.models import Livro
 from usuarios.models import Usuario
 
-from .models import Transacao
+from .models import Mensagem, Transacao
 from .services import (
     ErroTransacao,
     LivroIndisponivelError,
@@ -128,4 +128,38 @@ class TransacaoCriarSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         return TransacaoSerializer(instance, context=self.context).data
+
+
+class MensagemSerializer(serializers.ModelSerializer):
+    remetente_nome = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Mensagem
+        fields = (
+            'id',
+            'transacao',
+            'remetente',
+            'remetente_nome',
+            'conteudo',
+            'lida',
+            'criado_em',
+        )
+        read_only_fields = (
+            'id',
+            'transacao',
+            'remetente',
+            'remetente_nome',
+            'lida',
+            'criado_em',
+        )
+
+    def get_remetente_nome(self, obj: Mensagem) -> str:
+        return obj.remetente.get_full_name() or obj.remetente.username
+
+    def validate_conteudo(self, valor: str) -> str:
+        if not valor or not valor.strip():
+            raise serializers.ValidationError('Informe o conteúdo da mensagem.')
+        if len(valor.strip()) > 1000:
+            raise serializers.ValidationError('A mensagem pode ter no máximo 1000 caracteres.')
+        return valor.strip()
 
