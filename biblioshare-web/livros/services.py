@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Any, Dict, Optional
 
 import requests
@@ -10,12 +11,13 @@ GOOGLE_BOOKS_ENDPOINT = 'https://www.googleapis.com/books/v1/volumes'
 
 
 def buscar_livro_por_isbn(isbn: str) -> Optional[Dict[str, Any]]:
-    isbn = (isbn or '').strip()
-    if not isbn:
+    isbn_normalizado = normalizar_isbn(isbn)
+    if not isbn_normalizado or not isbn_valido(isbn_normalizado):
+        logger.debug('ISBN inválido informado para busca: %s', isbn)
         return None
 
     params = {
-        'q': f'isbn:{isbn}',
+        'q': f'isbn:{isbn_normalizado}',
         'maxResults': 1,
     }
 
@@ -27,7 +29,7 @@ def buscar_livro_por_isbn(isbn: str) -> Optional[Dict[str, Any]]:
         resposta = requests.get(GOOGLE_BOOKS_ENDPOINT, params=params, timeout=5)
         resposta.raise_for_status()
     except requests.RequestException as erro:
-        logger.warning('Falha ao consultar Google Books para ISBN %s: %s', isbn, erro)
+        logger.warning('Falha ao consultar Google Books para ISBN %s: %s', isbn_normalizado, erro)
         return None
 
     payload = resposta.json()
@@ -37,7 +39,7 @@ def buscar_livro_por_isbn(isbn: str) -> Optional[Dict[str, Any]]:
 
     volume_info = itens[0].get('volumeInfo', {})
     dados = {
-        'isbn': isbn,
+        'isbn': isbn_normalizado,
         'titulo': volume_info.get('title', '').strip(),
         'autor': ', '.join(volume_info.get('authors', [])),
         'editora': volume_info.get('publisher', '').strip(),
@@ -48,14 +50,32 @@ def buscar_livro_por_isbn(isbn: str) -> Optional[Dict[str, Any]]:
     return dados
 
 
+def normalizar_isbn(valor: str) -> str:
+    if not valor:
+        return ''
+    return re.sub(r'[^0-9Xx]', '', valor)
+
+
+def isbn_valido(isbn: str) -> bool:
+    if not isbn:
+        return False
+    if len(isbn) == 13:
+        return isbn.isdigit()
+    if len(isbn) == 10:
+        if not isbn[:9].isdigit():
+            return False
+        return isbn[-1].isdigit() or isbn[-1].upper() == 'X'
+    return False
+
+
 def _extrair_capa(image_links: Dict[str, Any]) -> str:
     if not image_links:
         return ''
     return (
-        image_links.get('thumbnail')
-        or image_links.get('smallThumbnail')
+        image_links.get('large')
         or image_links.get('medium')
-        or image_links.get('large')
+        or image_links.get('thumbnail')
+        or image_links.get('smallThumbnail')
         or ''
     )
 

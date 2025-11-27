@@ -19,16 +19,34 @@
             </div>
           {% endif %}
           {% for field in form %}
-            <div class="mb-3">
-              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-              {{ field }}
-              {% if field.help_text %}
-                <div class="form-text">{{ field.help_text }}</div>
-              {% endif %}
-              {% for error in field.errors %}
-                <div class="text-danger small">{{ error }}</div>
-              {% endfor %}
-            </div>
+            {% if field.name == 'isbn' %}
+              <div class="mb-3">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div class="input-group">
+                  {{ field }}
+                  <button type="submit" name="acao_buscar_isbn" value="1" class="btn btn-outline-secondary">
+                    Buscar ISBN
+                  </button>
+                </div>
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="mb-3">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
           {% endfor %}
           <button type="submit" class="btn btn-primary">Salvar livro</button>
         </form>
@@ -44,9 +62,18 @@
           <li>Cadastre todas as modalidades disponíveis para aproveitar as oportunidades.</li>
           <li>Você pode editar ou remover o livro a qualquer momento.</li>
         </ul>
+        <hr class="my-4">
+        <h3 class="h6 text-uppercase text-muted mb-3">Pré-visualização da capa</h3>
+        <div class="text-center">
+          {% if form.capa_url.value %}
+            <img src="{{ form.capa_url.value }}" alt="Capa do livro" class="img-fluid rounded shadow-sm mb-2">
+            <div class="small text-muted">Imagem sugerida pelo Google Books. Confirme ou ajuste o campo de URL da capa.</div>
+          {% else %}
+            <div class="small text-muted">A capa será mostrada aqui quando encontrada pelo ISBN.</div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
 </div>
 {% endblock %}
-

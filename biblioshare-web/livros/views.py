@@ -16,7 +16,7 @@ from .serializers import (
     LivroBuscarIsbnSerializer,
     LivroSerializer,
 )
-from .services import buscar_livro_por_isbn
+from .services import buscar_livro_por_isbn, isbn_valido, normalizar_isbn
 
 
 class MeusLivrosListCreateAPIView(generics.ListCreateAPIView):
@@ -110,6 +110,40 @@ class AdicionarLivroView(LoginRequiredMixin, CreateView):
     form_class = LivroForm
     template_name = 'livros/adicionar_livro.html'
     success_url = reverse_lazy('livros_web:meus-livros')
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        if 'acao_buscar_isbn' in request.POST:
+            isbn_informado = (request.POST.get('isbn') or '').strip()
+            isbn = normalizar_isbn(isbn_informado)
+            if not isbn:
+                messages.error(request, 'Informe um ISBN para buscar.')
+                form = self.get_form()
+                return self.render_to_response(self.get_context_data(form=form))
+            if not isbn_valido(isbn):
+                messages.error(
+                    request,
+                    'Informe um ISBN válido com 10 ou 13 dígitos. Traços e espaços são aceitos.',
+                )
+                form = self.get_form()
+                return self.render_to_response(self.get_context_data(form=form))
+            dados = buscar_livro_por_isbn(isbn)
+            if not dados:
+                messages.warning(request, 'Não encontramos informações para este ISBN.')
+                form = self.get_form()
+                return self.render_to_response(self.get_context_data(form=form))
+            data = request.POST.copy()
+            for campo in ['titulo', 'autor', 'editora', 'ano_publicacao', 'capa_url', 'sinopse']:
+                valor = dados.get(campo)
+                if valor:
+                    data[campo] = valor
+            form = self.form_class(data=data)
+            messages.success(
+                request,
+                'Dados carregados do Google Books. Revise as informações antes de salvar.',
+            )
+            return self.render_to_response(self.get_context_data(form=form))
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.dono = self.request.user
