@@ -29,6 +29,7 @@ interface FiltrosBusca {
 })
 export class BuscaPage implements OnDestroy {
   livros: Livro[] = [];
+  private livrosOriginais: Livro[] = [];
   carregando = false;
   erroCarregamento = false;
   usuario?: UsuarioPerfil | null;
@@ -81,10 +82,13 @@ export class BuscaPage implements OnDestroy {
       )
       .subscribe({
         next: (dados) => {
-          this.livros = dados;
+          this.livrosOriginais = dados;
+          this.atualizarLivrosVisiveis();
         },
         error: () => {
           this.erroCarregamento = true;
+          this.livrosOriginais = [];
+          this.livros = [];
         },
       });
   }
@@ -103,25 +107,11 @@ export class BuscaPage implements OnDestroy {
     return livro.id;
   }
 
-  abrirDetalhes(livro: Livro): void {
-    this.router.navigate(['/livros', livro.id]);
-  }
-
-  proporTroca(livro: Livro, event: Event): void {
-    event.stopPropagation();
-    this.router.navigate(['/transacoes/propor-troca', livro.id], {
+  abrirOferta(livro: Livro, event?: Event): void {
+    event?.stopPropagation();
+    this.router.navigate(['/oferta', livro.id], {
       state: { livro },
     });
-  }
-
-  permiteTroca(livro: Livro): boolean {
-    if (!livro.modalidades?.includes('TROCA')) {
-      return false;
-    }
-    if (!this.usuario) {
-      return true;
-    }
-    return livro.dono !== this.usuario.id;
   }
 
   rotuloModalidade(modalidade: string): string {
@@ -159,10 +149,23 @@ export class BuscaPage implements OnDestroy {
     const atual = this.autenticacaoService.obterUsuarioAtual();
     if (atual) {
       this.usuario = atual;
+      this.atualizarLivrosVisiveis();
       return;
     }
     this.subscriptions.add(
-      this.autenticacaoService.obterPerfil().subscribe((perfil) => (this.usuario = perfil)),
+      this.autenticacaoService.obterPerfil().subscribe((perfil) => {
+        this.usuario = perfil;
+        this.atualizarLivrosVisiveis();
+      }),
     );
+  }
+
+  private atualizarLivrosVisiveis(): void {
+    const usuarioId = this.usuario?.id;
+    if (!usuarioId) {
+      this.livros = [...this.livrosOriginais];
+      return;
+    }
+    this.livros = this.livrosOriginais.filter((livro) => livro.dono !== usuarioId);
   }
 }

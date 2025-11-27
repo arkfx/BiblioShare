@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Case, IntegerField, Value, When
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, FormView, ListView, TemplateView, UpdateView
+from django.views.generic import CreateView, DetailView, FormView, ListView, TemplateView, UpdateView
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -38,6 +38,14 @@ class LivroDetalheAPIView(generics.RetrieveUpdateDestroyAPIView):
         return Livro.objects.filter(dono=self.request.user)
 
 
+class LivroOfertaAPIView(generics.RetrieveAPIView):
+    serializer_class = LivroSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        return Livro.objects.filter(disponivel=True).select_related('dono')
+
+
 class LivroBuscarIsbnAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -60,17 +68,20 @@ class LivroBuscaAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Livro.objects.filter(disponivel=True)
-        if self.request.user.is_authenticated and self.request.user.cidade:
-            cidade = self.request.user.cidade.strip()
-            if cidade:
-                queryset = queryset.annotate(
-                    prioridade=Case(
-                        When(dono__cidade__iexact=cidade, then=Value(0)),
-                        default=Value(1),
-                        output_field=IntegerField(),
-                    )
-                ).order_by('prioridade', '-criado_em')
-                return queryset
+        cidade = ''
+        if self.request.user.is_authenticated:
+            queryset = queryset.exclude(dono=self.request.user)
+            if self.request.user.cidade:
+                cidade = self.request.user.cidade.strip()
+        if cidade:
+            queryset = queryset.annotate(
+                prioridade=Case(
+                    When(dono__cidade__iexact=cidade, then=Value(0)),
+                    default=Value(1),
+                    output_field=IntegerField(),
+                )
+            ).order_by('prioridade', '-criado_em')
+            return queryset
         return queryset.order_by('-criado_em')
 
 
@@ -207,6 +218,8 @@ class BuscarLivrosView(ListView):
 
     def get_queryset(self):
         queryset = Livro.objects.filter(disponivel=True)
+        if self.request.user.is_authenticated:
+            queryset = queryset.exclude(dono=self.request.user)
         self.filtro = LivroFiltro(self.request.GET or None, queryset=queryset)
         return self.filtro.qs
 
@@ -228,6 +241,8 @@ class VitrineLivrosView(TemplateView):
     def get_context_data(self, **kwargs):
         contexto = super().get_context_data(**kwargs)
         base_queryset = Livro.objects.filter(disponivel=True)
+        if self.request.user.is_authenticated:
+            base_queryset = base_queryset.exclude(dono=self.request.user)
         filtro = LivroFiltro(self.request.GET or None, queryset=base_queryset)
         livros_filtrados = filtro.qs
         cidade_usuario = ''
@@ -245,4 +260,25 @@ class VitrineLivrosView(TemplateView):
         contexto['livros_proximos'] = livros_proximos
         contexto['livros_outros'] = livros_outros
         contexto['cidade_usuario'] = cidade_usuario
+        return contexto
+
+
+class OfertaLivroView(DetailView):
+    template_name = 'livros/oferta_livro.html'
+    context_object_name = 'livro'
+
+    def get_queryset(self):
+        return Livro.objects.filter(disponivel=True).select_related('dono')
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        livro: Livro = self.object
+        usuario = self.request.user if self.request.user.is_authenticated else None
+        modalidades = livro.modalidades or []
+        contexto['eh_dono'] = bool(usuario and livro.dono_id == usuario.id)
+        contexto['modalidades_opcoes'] = Livro.Modalidades.choices
+        contexto['tem_doacao'] = Livro.Modalidades.DOACAO in modalidades
+        contexto['tem_emprestimo'] = Livro.Modalidades.EMPRESTIMO in modalidades
+        contexto['tem_aluguel'] = Livro.Modalidades.ALUGUEL in modalidades
+        contexto['tem_troca'] = Livro.Modalidades.TROCA in modalidades
         return contexto

@@ -80,37 +80,59 @@
     <p>Nenhum livro encontrado com os filtros informados.</p>
   </div>
 
-  <ion-list *ngIf="livros.length > 0">
-    <ion-item
-      lines="full"
+  <div class="lista-livros" *ngIf="livros.length > 0">
+    <ion-card
+      class="livro-card"
       *ngFor="let livro of livros; trackBy: trackByLivro"
+      (click)="abrirOferta(livro)"
     >
-      <ion-label>
-        <h2>{{ livro.titulo }}</h2>
-        <p>{{ livro.autor || 'Autor não informado' }}</p>
-        <p class="texto-menor">
-          Cidade: {{ livro.dono_cidade || 'Não informada' }}
-        </p>
-        <p class="texto-menor">
-          Modalidades:
-          <ng-container *ngIf="livro.modalidades?.length; else semModalidade">
-            <ng-container *ngFor="let modalidade of livro.modalidades; let ultimo = last">
-              {{ rotuloModalidade(modalidade) }}<span *ngIf="!ultimo"> · </span>
-            </ng-container>
-          </ng-container>
-          <ng-template #semModalidade>Não informado</ng-template>
-        </p>
-      </ion-label>
-      <ion-button
-        slot="end"
-        size="small"
-        fill="outline"
-        color="primary"
-        *ngIf="permiteTroca(livro)"
-        (click)="proporTroca(livro, $event)"
-      >
-        Propor troca
-      </ion-button>
-    </ion-item>
-  </ion-list>
+      <div class="livro-card__conteudo">
+        <div class="livro-card__capa">
+          <img
+            *ngIf="livro.capa_url; else semCapa"
+            [src]="livro.capa_url"
+            [alt]="'Capa do livro ' + livro.titulo"
+            loading="lazy"
+          />
+          <ng-template #semCapa>
+            <div class="placeholder-capa">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+          </ng-template>
+        </div>
+        <div class="livro-card__info">
+          <h2>{{ livro.titulo }}</h2>
+          <p class="texto-menor">{{ livro.autor || 'Autor não informado' }}</p>
+          <p class="texto-menor">
+            Cidade: {{ livro.dono_cidade || 'Não informada' }}
+          </p>
+          <div class="chips-modalidades" *ngIf="livro.modalidades?.length; else semModalidade">
+            <ion-chip
+              color="primary"
+              *ngFor="let modalidade of livro.modalidades"
+            >
+              {{ rotuloModalidade(modalidade) }}
+            </ion-chip>
+          </div>
+          <ng-template #semModalidade>
+            <p class="texto-menor">Modalidades não informadas.</p>
+          </ng-template>
+          <p class="texto-menor sinopse">
+            {{
+              (livro.sinopse || 'Sem sinopse cadastrada.')
+                | slice:0:160
+            }}<span *ngIf="(livro.sinopse || '').length > 160">...</span>
+          </p>
+          <ion-button
+            size="small"
+            fill="outline"
+            color="primary"
+            (click)="abrirOferta(livro, $event)"
+          >
+            Ver oferta
+          </ion-button>
+        </div>
+      </div>
+    </ion-card>
+  </div>
 </ion-content>

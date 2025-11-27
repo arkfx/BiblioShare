@@ -20,3 +20,71 @@
   color: var(--ion-color-medium);
 }
 
+.lista-livros {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.livro-card {
+  cursor: pointer;
+
+  &__conteudo {
+    display: flex;
+    gap: 1rem;
+  }
+
+  &__capa {
+    flex: 0 0 110px;
+    max-width: 120px;
+
+    img,
+    .placeholder-capa {
+      width: 100%;
+      height: 160px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--ion-color-light);
+    }
+  }
+
+  &__info {
+    flex: 1;
+  }
+}
+
+.placeholder-capa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ion-color-medium);
+  border: 1px dashed var(--ion-color-medium);
+}
+
+.chips-modalidades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.4rem 0;
+}
+
+.sinopse {
+  margin: 0.5rem 0;
+}
+
+@media (max-width: 600px) {
+  .livro-card__conteudo {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .livro-card__capa {
+    width: 150px;
+  }
+
+  .livro-card__info {
+    width: 100%;
+  }
+}
+

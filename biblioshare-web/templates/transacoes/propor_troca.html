@@ -31,14 +31,6 @@
               <div class="text-danger small">{{ form.livros_oferecidos.errors.0 }}</div>
             {% endif %}
           </div>
-          <div class="mb-3">
-            {{ form.livros_solicitados.label_tag }}
-            <p class="form-text mb-1">Opcional · Além do livro principal.</p>
-            {{ form.livros_solicitados }}
-            {% if form.livros_solicitados.errors %}
-              <div class="text-danger small">{{ form.livros_solicitados.errors.0 }}</div>
-            {% endif %}
-          </div>
           {% if form.non_field_errors %}
             <div class="alert alert-danger">{{ form.non_field_errors.0 }}</div>
           {% endif %}

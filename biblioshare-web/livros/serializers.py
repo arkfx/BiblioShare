@@ -10,6 +10,7 @@ class LivroSerializer(serializers.ModelSerializer):
         child=serializers.ChoiceField(choices=Livro.Modalidades.choices),
         allow_empty=False,
     )
+    dono_nome = serializers.SerializerMethodField()
     dono_cidade = serializers.CharField(
         source='dono.cidade',
         read_only=True,
@@ -24,6 +25,7 @@ class LivroSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'dono',
+            'dono_nome',
              'dono_cidade',
              'dono_estado',
             'isbn',
@@ -43,6 +45,7 @@ class LivroSerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
             'dono',
+            'dono_nome',
             'dono_cidade',
             'dono_estado',
             'criado_em',
@@ -66,6 +69,9 @@ class LivroSerializer(serializers.ModelSerializer):
         if request:
             validated_data['dono'] = request.user
         return super().create(validated_data)
+
+    def get_dono_nome(self, obj):
+        return obj.dono.get_full_name() or obj.dono.username
 
 
 class ListaDesejoSerializer(serializers.ModelSerializer):

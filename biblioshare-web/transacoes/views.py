@@ -1,12 +1,15 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils.dateparse import parse_date
+from django.views import View
 from django.views.generic import DetailView, FormView, ListView
 from rest_framework import generics, permissions, status
+from rest_framework.exceptions import PermissionDenied, ValidationError as DRFValidationError
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -67,7 +70,7 @@ class TransacaoAcaoBaseAPIView(TransacaoQuerysetMixin, APIView):
         except PermissaoNegadaError as erro:
             raise PermissionDenied(str(erro)) from erro
         except (EstadoInvalidoError, LivroIndisponivelError, ErroTransacao) as erro:
-            raise ValidationError(str(erro)) from erro
+            raise DRFValidationError(str(erro)) from erro
         serializer = TransacaoSerializer(transacao, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -113,7 +116,7 @@ class MensagensTransacaoAPIView(generics.ListCreateAPIView):
             try:
                 depois_de_id = int(depois_de)
             except (TypeError, ValueError) as erro:
-                raise ValidationError({'depois_de': 'Parâmetro inválido.'}) from erro
+                raise DRFValidationError({'depois_de': 'Parâmetro inválido.'}) from erro
             queryset = queryset.filter(id__gt=depois_de_id)
         return queryset
 
@@ -144,6 +147,65 @@ class MensagensTransacaoAPIView(generics.ListCreateAPIView):
             Mensagem.objects.filter(id__in=mensagens_ids, lida=False).exclude(remetente_id=usuario_id).update(
                 lida=True
             )
+
+
+class CriarTransacaoSimplesView(LoginRequiredMixin, View):
+    http_method_names = ['post']
+    tipos_permitidos = {
+        Transacao.Tipo.DOACAO,
+        Transacao.Tipo.EMPRESTIMO,
+        Transacao.Tipo.ALUGUEL,
+    }
+
+    def post(self, request, tipo: str, livro_id: int):
+        tipo_normalizado = (tipo or '').upper()
+        redirect_url = reverse_lazy('livros_web:oferta-livro', kwargs={'pk': livro_id})
+        if tipo_normalizado not in self.tipos_permitidos:
+            messages.error(request, 'Modalidade de transação inválida para solicitação rápida.')
+            return redirect(redirect_url)
+
+        livro = get_object_or_404(
+            Livro.objects.select_related('dono'),
+            pk=livro_id,
+            disponivel=True,
+        )
+        if livro.dono_id == request.user.id:
+            messages.error(request, 'Você não pode solicitar seu próprio livro.')
+            return redirect(redirect_url)
+
+        data_limite = None
+        if tipo_normalizado in (Transacao.Tipo.EMPRESTIMO, Transacao.Tipo.ALUGUEL):
+            data_limite_str = request.POST.get('data_limite') or ''
+            if data_limite_str:
+                data_limite = parse_date(data_limite_str)
+                if not data_limite:
+                    messages.error(request, 'Informe uma data válida no formato AAAA-MM-DD.')
+                    return redirect(redirect_url)
+
+        try:
+            transacao = criar_transacao_solicitacao(
+                request.user,
+                livro.id,
+                tipo_normalizado,
+                livros_oferecidos_ids=[],
+                livros_solicitados_ids=[],
+                data_limite=data_limite,
+            )
+        except PermissaoNegadaError as erro:
+            messages.error(request, str(erro))
+            return redirect(redirect_url)
+        except (
+            LivroIndisponivelError,
+            EstadoInvalidoError,
+            ErroTransacao,
+            DjangoValidationError,
+        ) as erro:
+            messages.error(request, str(erro))
+            return redirect(redirect_url)
+
+        tipo_label = Transacao.Tipo(tipo_normalizado).label
+        messages.success(request, f'Solicitação de {tipo_label.lower()} enviada com sucesso.')
+        return redirect('transacoes_web:detalhes', pk=transacao.pk)
 
 
 class TransacoesListaView(LoginRequiredMixin, ListView):
@@ -233,13 +295,12 @@ class ProporTrocaView(LoginRequiredMixin, FormView):
         )
         if self.livro_principal.dono_id == request.user.id:
             messages.error(request, 'Você não pode propor troca com um livro próprio.')
-            return redirect('livros_web:detalhes-livro', pk=self.livro_principal.pk)
+            return redirect('livros_web:oferta-livro', pk=self.livro_principal.pk)
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['usuario'] = self.request.user
-        kwargs['livro_principal'] = self.livro_principal
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -249,14 +310,13 @@ class ProporTrocaView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         livros_oferecidos = list(form.cleaned_data['livros_oferecidos'].values_list('id', flat=True))
-        livros_solicitados = list(form.cleaned_data['livros_solicitados'].values_list('id', flat=True))
         try:
             criar_transacao_solicitacao(
                 self.request.user,
                 self.livro_principal.id,
                 Transacao.Tipo.TROCA,
                 livros_oferecidos_ids=livros_oferecidos,
-                livros_solicitados_ids=livros_solicitados,
+                livros_solicitados_ids=[],
             )
         except PermissaoNegadaError as erro:
             form.add_error(None, str(erro))

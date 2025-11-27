@@ -1,0 +1,163 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/busca"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Oferta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="estado" *ngIf="carregando">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Carregando oferta...</p>
+  </div>
+
+  <div class="estado erro" *ngIf="!carregando && !livro">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>Não foi possível carregar esta oferta.</p>
+  </div>
+
+  <ng-container *ngIf="livro">
+    <ion-card>
+      <div class="card-oferta">
+        <div class="card-oferta__capa">
+          <img
+            *ngIf="livro.capa_url; else semCapa"
+            [src]="livro.capa_url"
+            [alt]="'Capa do livro ' + livro.titulo"
+            loading="lazy"
+          />
+          <ng-template #semCapa>
+            <div class="placeholder-capa">
+              <ion-icon name="book-outline"></ion-icon>
+              <span>Sem capa</span>
+            </div>
+          </ng-template>
+        </div>
+        <div class="card-oferta__info">
+          <ion-card-header>
+            <ion-card-subtitle>Disponível na comunidade</ion-card-subtitle>
+            <ion-card-title>{{ livro.titulo }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p class="texto-suave">{{ livro.autor || 'Autor não informado' }}</p>
+            <p class="texto-suave">
+              Cidade: {{ livro.dono_cidade || 'Não informada' }}
+              <ng-container *ngIf="livro.dono_estado">/ {{ livro.dono_estado }}</ng-container>
+            </p>
+            <p class="texto-suave">
+              Dono: {{ livro.dono_nome || 'Usuário da comunidade' }}
+            </p>
+            <div class="chips-modalidades" *ngIf="livro.modalidades?.length">
+              <ion-chip color="primary" *ngFor="let modalidade of livro.modalidades">
+                {{ rotuloModalidade(modalidade) }}
+              </ion-chip>
+            </div>
+            <p class="sinopse">
+              {{ livro.sinopse || 'Sem sinopse cadastrada.' }}
+            </p>
+            <div class="detalhes-extra">
+              <p *ngIf="livro.editora"><strong>Editora:</strong> {{ livro.editora }}</p>
+              <p *ngIf="livro.ano_publicacao"><strong>Ano:</strong> {{ livro.ano_publicacao }}</p>
+              <p *ngIf="livro.isbn"><strong>ISBN:</strong> {{ livro.isbn }}</p>
+            </div>
+          </ion-card-content>
+        </div>
+      </div>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Interações disponíveis</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="alerta" *ngIf="ehDono">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <div>
+            <p>Este livro faz parte do seu inventário.</p>
+            <p class="texto-suave">
+              Gerencie-o em <a routerLink="/meus-livros">Meus livros</a>.
+            </p>
+          </div>
+        </div>
+
+        <div class="alerta" *ngIf="!ehDono && (!livro.modalidades || livro.modalidades.length === 0)">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <div>
+            <p>Nenhuma modalidade foi configurada para este anúncio.</p>
+          </div>
+        </div>
+
+        <ng-container *ngIf="!ehDono">
+          <div class="cta" *ngIf="temModalidade('DOACAO')">
+            <div>
+              <h3>Solicitar doação</h3>
+              <p class="texto-suave">Enviaremos uma solicitação ao dono.</p>
+            </div>
+            <ion-button
+              color="primary"
+              [disabled]="enviando"
+              (click)="solicitar('DOACAO')"
+            >
+              Solicitar
+            </ion-button>
+          </div>
+
+          <div class="cta" *ngIf="temModalidade('EMPRESTIMO')">
+            <div class="cta__texto">
+              <h3>Solicitar empréstimo</h3>
+              <p class="texto-suave">Informe opcionalmente uma data limite de devolução.</p>
+              <ion-input
+                type="date"
+                [(ngModel)]="dataLimiteEmprestimo"
+                [disabled]="enviando"
+              ></ion-input>
+            </div>
+            <ion-button
+              color="medium"
+              fill="outline"
+              [disabled]="enviando"
+              (click)="solicitar('EMPRESTIMO')"
+            >
+              Solicitar
+            </ion-button>
+          </div>
+
+          <div class="cta" *ngIf="temModalidade('ALUGUEL')">
+            <div class="cta__texto">
+              <h3>Solicitar aluguel</h3>
+              <p class="texto-suave">
+                Valor semanal informado: {{ livro.valor_aluguel_semanal || '-' }}
+              </p>
+              <ion-input
+                type="date"
+                [(ngModel)]="dataLimiteAluguel"
+                [disabled]="enviando"
+              ></ion-input>
+            </div>
+            <ion-button
+              color="tertiary"
+              fill="outline"
+              [disabled]="enviando"
+              (click)="solicitar('ALUGUEL')"
+            >
+              Solicitar
+            </ion-button>
+          </div>
+
+          <div class="cta troca" *ngIf="temModalidade('TROCA')">
+            <div>
+              <h3>Propor troca</h3>
+              <p class="texto-suave">Escolha um livro do seu inventário para oferecer.</p>
+            </div>
+            <ion-button color="success" [disabled]="enviando" (click)="proporTroca()">
+              Propor troca
+            </ion-button>
+          </div>
+        </ng-container>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+</ion-content>
+

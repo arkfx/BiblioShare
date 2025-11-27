@@ -1,6 +1,7 @@
 export interface Livro {
   id: number;
   dono: number;
+  dono_nome?: string;
   dono_cidade?: string | null;
   dono_estado?: string | null;
   isbn: string;

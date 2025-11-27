@@ -51,6 +51,12 @@ const routes: Routes = [
       import('./paginas/busca/busca.module').then((m) => m.BuscaPageModule),
   },
   {
+    path: 'oferta/:id',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./paginas/oferta-livro/oferta-livro.module').then((m) => m.OfertaLivroPageModule),
+  },
+  {
     path: 'transacoes/detalhes/:id',
     canActivate: [AuthGuard],
     loadChildren: () =>

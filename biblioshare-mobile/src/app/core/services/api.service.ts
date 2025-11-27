@@ -42,6 +42,10 @@ export class ApiService {
     return this.obter<Livro[]>('livros/buscar/', parametros);
   }
 
+  obterLivroOferta(id: number): Observable<Livro> {
+    return this.obter<Livro>(`livros/oferta/${id}/`);
+  }
+
   listarTransacoes(parametros?: Record<string, string | number | boolean>): Observable<Transacao[]> {
     return this.obter<Transacao[]>('transacoes/', parametros);
   }

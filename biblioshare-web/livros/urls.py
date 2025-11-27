@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     LivroBuscaAPIView,
+    LivroOfertaAPIView,
     ListaDesejoDestroyAPIView,
     ListaDesejosListCreateAPIView,
     LivroBuscarIsbnAPIView,
@@ -15,6 +16,7 @@ urlpatterns = [
     path('livros/', MeusLivrosListCreateAPIView.as_view(), name='livros-lista'),
     path('livros/buscar/', LivroBuscaAPIView.as_view(), name='livros-busca'),
     path('livros/buscar-isbn/', LivroBuscarIsbnAPIView.as_view(), name='livros-buscar-isbn'),
+    path('livros/oferta/<int:pk>/', LivroOfertaAPIView.as_view(), name='livros-oferta'),
     path('livros/<int:pk>/', LivroDetalheAPIView.as_view(), name='livros-detalhe'),
     path('lista-desejos/', ListaDesejosListCreateAPIView.as_view(), name='lista-desejos-lista'),
     path('lista-desejos/<int:pk>/', ListaDesejoDestroyAPIView.as_view(), name='lista-desejos-detalhe'),
