@@ -7,8 +7,14 @@ import { AdicionarLivroPageRoutingModule } from './adicionar-livro-routing.modul
 import { AdicionarLivroPage } from './adicionar-livro.page';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule, AdicionarLivroPageRoutingModule],
-  declarations: [AdicionarLivroPage],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    IonicModule,
+    AdicionarLivroPageRoutingModule,
+    AdicionarLivroPage,
+  ],
 })
 export class AdicionarLivroPageModule {}
 

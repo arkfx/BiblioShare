@@ -7,8 +7,13 @@ import { PropostaTrocaPageRoutingModule } from './proposta-troca-routing.module'
 import { PropostaTrocaPage } from './proposta-troca.page';
 
 @NgModule({
-  imports: [CommonModule, ReactiveFormsModule, IonicModule, PropostaTrocaPageRoutingModule],
-  declarations: [PropostaTrocaPage],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    IonicModule,
+    PropostaTrocaPageRoutingModule,
+    PropostaTrocaPage,
+  ],
 })
 export class PropostaTrocaPageModule {}
 

@@ -7,8 +7,14 @@ import { ListaDesejosPageRoutingModule } from './lista-desejos-routing.module';
 import { ListaDesejosPage } from './lista-desejos.page';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule, ListaDesejosPageRoutingModule],
-  declarations: [ListaDesejosPage],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    IonicModule,
+    ListaDesejosPageRoutingModule,
+    ListaDesejosPage,
+  ],
 })
 export class ListaDesejosPageModule {}
 

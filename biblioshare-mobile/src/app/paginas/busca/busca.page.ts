@@ -133,16 +133,16 @@ export class BuscaPage implements OnDestroy {
     const params: Record<string, string> = {};
     const { q, modalidade, cidade, ordenacao } = this.filtros;
     if (q.trim()) {
-      params.q = q.trim();
+      params['q'] = q.trim();
     }
     if (modalidade) {
-      params.modalidade = modalidade;
+      params['modalidade'] = modalidade;
     }
     if (cidade.trim()) {
-      params.cidade = cidade.trim();
+      params['cidade'] = cidade.trim();
     }
     if (ordenacao) {
-      params.ordenacao = ordenacao;
+      params['ordenacao'] = ordenacao;
     }
     return params;
   }

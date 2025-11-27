@@ -13,8 +13,8 @@ import { MeusLivrosPage } from './meus-livros.page';
     CommonModule,
     FormsModule,
     IonicModule,
-    MeusLivrosPageRoutingModule
+    MeusLivrosPageRoutingModule,
+    MeusLivrosPage,
   ],
-  declarations: [MeusLivrosPage]
 })
 export class MeusLivrosPageModule {}

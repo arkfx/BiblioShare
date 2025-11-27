@@ -7,8 +7,14 @@ import { DetalhesLivroPageRoutingModule } from './detalhes-livro-routing.module'
 import { DetalhesLivroPage } from './detalhes-livro.page';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule, DetalhesLivroPageRoutingModule],
-  declarations: [DetalhesLivroPage],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    IonicModule,
+    DetalhesLivroPageRoutingModule,
+    DetalhesLivroPage,
+  ],
 })
 export class DetalhesLivroPageModule {}
 

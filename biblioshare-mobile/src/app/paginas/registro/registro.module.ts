@@ -8,8 +8,14 @@ import { RegistroPageRoutingModule } from './registro-routing.module';
 import { RegistroPage } from './registro.page';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule, RegistroPageRoutingModule],
-  declarations: [RegistroPage],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    IonicModule,
+    RegistroPageRoutingModule,
+    RegistroPage,
+  ],
 })
 export class RegistroPageModule {}
 

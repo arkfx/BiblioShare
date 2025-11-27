@@ -13,8 +13,8 @@ import { BuscaPage } from './busca.page';
     CommonModule,
     FormsModule,
     IonicModule,
-    BuscaPageRoutingModule
+    BuscaPageRoutingModule,
+    BuscaPage,
   ],
-  declarations: [BuscaPage]
 })
 export class BuscaPageModule {}

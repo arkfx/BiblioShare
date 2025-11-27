@@ -7,8 +7,13 @@ import { DetalhesTransacaoPageRoutingModule } from './detalhes-transacao-routing
 import { DetalhesTransacaoPage } from './detalhes-transacao.page';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, IonicModule, DetalhesTransacaoPageRoutingModule],
-  declarations: [DetalhesTransacaoPage],
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonicModule,
+    DetalhesTransacaoPageRoutingModule,
+    DetalhesTransacaoPage,
+  ],
 })
 export class DetalhesTransacaoPageModule {}
 

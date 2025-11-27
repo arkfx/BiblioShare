@@ -13,8 +13,8 @@ import { TransacoesPage } from './transacoes.page';
     CommonModule,
     FormsModule,
     IonicModule,
-    TransacoesPageRoutingModule
+    TransacoesPageRoutingModule,
+    TransacoesPage,
   ],
-  declarations: [TransacoesPage]
 })
 export class TransacoesPageModule {}
