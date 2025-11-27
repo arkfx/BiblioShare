@@ -79,10 +79,8 @@
 
   <ion-list *ngIf="livros.length > 0">
     <ion-item
-      button="true"
-      detail="false"
+      lines="full"
       *ngFor="let livro of livros; trackBy: trackByLivro"
-      (click)="abrirDetalhes(livro)"
     >
       <ion-label>
         <h2>{{ livro.titulo }}</h2>
@@ -100,6 +98,16 @@
           <ng-template #semModalidade>Não informado</ng-template>
         </p>
       </ion-label>
+      <ion-button
+        slot="end"
+        size="small"
+        fill="outline"
+        color="primary"
+        *ngIf="permiteTroca(livro)"
+        (click)="proporTroca(livro, $event)"
+      >
+        Propor troca
+      </ion-button>
     </ion-item>
   </ion-list>
 </ion-content>

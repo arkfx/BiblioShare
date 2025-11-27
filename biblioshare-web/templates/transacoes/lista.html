@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Transações · BiblioShare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1">Minhas transações</h1>
+    <p class="text-muted mb-0">Acompanhe solicitações que você enviou ou recebeu.</p>
+  </div>
+  <a class="btn btn-outline-primary" href="{% url 'livros_web:buscar' %}">Buscar livros</a>
+</div>
+
+<form class="row g-2 align-items-end mb-4" method="get">
+  <div class="col-auto">
+    <label class="form-label mb-1" for="status">Status</label>
+    <select class="form-select" id="status" name="status">
+      <option value="">Todos</option>
+      {% for valor, label in status_opcoes %}
+        <option value="{{ valor }}" {% if status_selecionado == valor %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary" type="submit">Filtrar</button>
+  </div>
+</form>
+
+{% if transacoes %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Livro principal</th>
+          <th>Contraparte</th>
+          <th>Status</th>
+          <th>Atualizado em</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for transacao in transacoes %}
+          <tr>
+            <td class="fw-semibold">{{ transacao.get_tipo_display }}</td>
+            <td>
+              <div class="fw-semibold">{{ transacao.livro_principal.titulo }}</div>
+              <small class="text-muted">{{ transacao.livro_principal.autor }}</small>
+            </td>
+            <td>
+              {% if transacao.solicitante == request.user %}
+                <div class="fw-semibold">{{ transacao.dono.get_full_name|default:transacao.dono.username }}</div>
+                <small class="text-muted">Dono do livro</small>
+              {% else %}
+                <div class="fw-semibold">{{ transacao.solicitante.get_full_name|default:transacao.solicitante.username }}</div>
+                <small class="text-muted">Solicitante</small>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge text-bg-light border">{{ transacao.get_status_display }}</span>
+            </td>
+            <td>{{ transacao.atualizado_em|date:"d/m/Y H:i" }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'transacoes_web:detalhes' transacao.pk %}">Detalhes</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="border rounded text-center py-5">
+    <p class="mb-3">Nenhuma transação encontrada.</p>
+    <a class="btn btn-primary" href="{% url 'livros_web:buscar' %}">Explorar livros disponíveis</a>
+  </div>
+{% endif %}
+{% endblock %}
+

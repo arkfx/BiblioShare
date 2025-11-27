@@ -1,9 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import { Livro } from '../../core/modelos/livros';
 import { ApiService } from '../../core/services/api.service';
+import {
+  AutenticacaoService,
+  UsuarioPerfil,
+} from '../../core/services/autenticacao.service';
 
 interface FiltrosBusca {
   q: string;
@@ -17,10 +22,11 @@ interface FiltrosBusca {
   templateUrl: './busca.page.html',
   styleUrls: ['./busca.page.scss'],
 })
-export class BuscaPage {
+export class BuscaPage implements OnDestroy {
   livros: Livro[] = [];
   carregando = false;
   erroCarregamento = false;
+  usuario?: UsuarioPerfil | null;
   filtros: FiltrosBusca = {
     q: '',
     modalidade: '',
@@ -39,13 +45,20 @@ export class BuscaPage {
     { label: 'Título A-Z', valor: 'titulo' },
     { label: 'Cidade', valor: 'cidade' },
   ];
+  private readonly subscriptions = new Subscription();
 
   constructor(
     private readonly apiService: ApiService,
     private readonly router: Router,
+    private readonly autenticacaoService: AutenticacaoService,
   ) {}
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
   ionViewWillEnter(): void {
+    this.garantirPerfil();
     this.buscarLivros();
   }
 
@@ -89,6 +102,23 @@ export class BuscaPage {
     this.router.navigate(['/livros', livro.id]);
   }
 
+  proporTroca(livro: Livro, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/transacoes/propor-troca', livro.id], {
+      state: { livro },
+    });
+  }
+
+  permiteTroca(livro: Livro): boolean {
+    if (!livro.modalidades?.includes('TROCA')) {
+      return false;
+    }
+    if (!this.usuario) {
+      return true;
+    }
+    return livro.dono !== this.usuario.id;
+  }
+
   rotuloModalidade(modalidade: string): string {
     const mapa: Record<string, string> = {
       DOACAO: 'Doação',
@@ -115,5 +145,19 @@ export class BuscaPage {
       params.ordenacao = ordenacao;
     }
     return params;
+  }
+
+  private garantirPerfil(): void {
+    if (!this.autenticacaoService.estaAutenticado()) {
+      return;
+    }
+    const atual = this.autenticacaoService.obterUsuarioAtual();
+    if (atual) {
+      this.usuario = atual;
+      return;
+    }
+    this.subscriptions.add(
+      this.autenticacaoService.obterPerfil().subscribe((perfil) => (this.usuario = perfil)),
+    );
   }
 }

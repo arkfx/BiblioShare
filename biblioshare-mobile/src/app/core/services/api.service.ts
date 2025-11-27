@@ -4,6 +4,10 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { Livro } from '../modelos/livros';
+import {
+  CriarTransacaoPayload,
+  Transacao,
+} from '../modelos/transacoes';
 
 @Injectable({
   providedIn: 'root',
@@ -36,6 +40,30 @@ export class ApiService {
 
   buscarLivros(parametros?: Record<string, string | number | boolean>): Observable<Livro[]> {
     return this.obter<Livro[]>('livros/buscar/', parametros);
+  }
+
+  listarTransacoes(parametros?: Record<string, string | number | boolean>): Observable<Transacao[]> {
+    return this.obter<Transacao[]>('transacoes/', parametros);
+  }
+
+  obterTransacao(id: number): Observable<Transacao> {
+    return this.obter<Transacao>(`transacoes/${id}/`);
+  }
+
+  criarTransacao(payload: CriarTransacaoPayload): Observable<Transacao> {
+    return this.criar<Transacao>('transacoes/', payload);
+  }
+
+  aceitarTransacao(id: number): Observable<Transacao> {
+    return this.criar<Transacao>(`transacoes/${id}/aceitar/`, {});
+  }
+
+  recusarTransacao(id: number): Observable<Transacao> {
+    return this.criar<Transacao>(`transacoes/${id}/recusar/`, {});
+  }
+
+  cancelarTransacao(id: number): Observable<Transacao> {
+    return this.criar<Transacao>(`transacoes/${id}/cancelar/`, {});
   }
 
   private montarUrl(caminho: string): string {

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Propor troca · BiblioShare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a class="text-decoration-none" href="{% url 'livros_web:buscar' %}">← Voltar à busca</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-body">
+        <p class="text-muted mb-1">Propondo troca para</p>
+        <h1 class="h4 mb-1">{{ livro_principal.titulo }}</h1>
+        <p class="text-muted mb-3">{{ livro_principal.autor }}</p>
+        <p class="mb-1"><strong>Dono:</strong> {{ livro_principal.dono.get_full_name|default:livro_principal.dono.username }}</p>
+        <p class="mb-0"><strong>Cidade:</strong> {{ livro_principal.dono.cidade }} / {{ livro_principal.dono.estado }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Selecione os livros da proposta</h2>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            {{ form.livros_oferecidos.label_tag }}
+            {{ form.livros_oferecidos }}
+            {% if form.livros_oferecidos.errors %}
+              <div class="text-danger small">{{ form.livros_oferecidos.errors.0 }}</div>
+            {% endif %}
+          </div>
+          <div class="mb-3">
+            {{ form.livros_solicitados.label_tag }}
+            <p class="form-text mb-1">Opcional · Além do livro principal.</p>
+            {{ form.livros_solicitados }}
+            {% if form.livros_solicitados.errors %}
+              <div class="text-danger small">{{ form.livros_solicitados.errors.0 }}</div>
+            {% endif %}
+          </div>
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors.0 }}</div>
+          {% endif %}
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Enviar proposta</button>
+            <a class="btn btn-outline-secondary" href="{% url 'livros_web:buscar' %}">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

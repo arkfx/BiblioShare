@@ -17,8 +17,10 @@ urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('api/', include('usuarios.urls')),
     path('api/', include('livros.urls')),
+    path('api/', include('transacoes.urls')),
     path('', include('usuarios.urls_web')),
     path('', include('livros.urls_web')),
+    path('', include('transacoes.urls_web')),
 ]
 
 if settings.DEBUG:

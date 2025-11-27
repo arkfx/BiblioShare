@@ -1,0 +1,125 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/transacoes"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalhes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="buscarTransacao($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="estado" *ngIf="carregando">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Carregando transação...</p>
+  </div>
+
+  <ng-container *ngIf="!carregando && transacao">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>{{ rotuloTipo(transacao.tipo) }}</ion-card-subtitle>
+        <ion-card-title>{{ transacao.livro_principal.titulo }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="linha-status">
+          <span class="etiqueta">Status</span>
+          <ion-badge color="medium">{{ rotuloStatus(transacao.status) }}</ion-badge>
+        </div>
+        <p class="descricao">
+          Solicitante: {{ transacao.solicitante.nome_completo }}
+        </p>
+        <p class="descricao">
+          Dono: {{ transacao.dono.nome_completo }}
+        </p>
+        <p class="descricao" *ngIf="transacao.data_limite_devolucao">
+          Devolução até {{ transacao.data_limite_devolucao | date: 'dd/MM/yyyy' }}
+        </p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="transacao.tipo === 'TROCA'">
+      <ion-card-header>
+        <ion-card-title>Livros na proposta</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <h3>Oferecidos por você</h3>
+        <ion-list lines="none" *ngIf="transacao.livros_oferecidos.length; else semOfertas">
+          <ion-item *ngFor="let livro of transacao.livros_oferecidos">
+            <ion-label>
+              <h4>{{ livro.titulo }}</h4>
+              <p>{{ livro.autor || 'Autor não informado' }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+        <ng-template #semOfertas>
+          <p class="descricao">Nenhum livro oferecido.</p>
+        </ng-template>
+
+        <h3 class="secao-extra">Desejados do dono</h3>
+        <ion-list lines="none" *ngIf="livrosSolicitadosExtras.length; else apenasPrincipal">
+          <ion-item *ngFor="let livro of livrosSolicitadosExtras">
+            <ion-label>
+              <h4>{{ livro.titulo }}</h4>
+              <p>{{ livro.autor || 'Autor não informado' }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+        <ng-template #apenasPrincipal>
+          <p class="descricao">A troca considera apenas o livro principal.</p>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Informações rápidas</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="descricao">
+          Criado em {{ transacao.criado_em | date: 'dd/MM HH:mm' }}
+        </p>
+        <p class="descricao">
+          Atualizado em {{ transacao.atualizado_em | date: 'dd/MM HH:mm' }}
+        </p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="podeAceitar || podeRecusar || podeCancelar">
+      <ion-card-content class="acoes">
+        <ion-button
+          expand="block"
+          color="success"
+          [disabled]="processando"
+          *ngIf="podeAceitar"
+          (click)="confirmarAcao('aceitar')"
+        >
+          Aceitar solicitação
+        </ion-button>
+        <ion-button
+          expand="block"
+          color="medium"
+          fill="outline"
+          [disabled]="processando"
+          *ngIf="podeRecusar"
+          (click)="confirmarAcao('recusar')"
+        >
+          Recusar solicitação
+        </ion-button>
+        <ion-button
+          expand="block"
+          color="danger"
+          fill="outline"
+          [disabled]="processando"
+          *ngIf="podeCancelar"
+          (click)="confirmarAcao('cancelar')"
+        >
+          Cancelar transação
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+</ion-content>
+

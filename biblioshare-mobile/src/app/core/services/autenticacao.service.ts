@@ -12,6 +12,7 @@ interface Tokens {
 }
 
 export interface UsuarioPerfil {
+  id: number;
   username: string;
   email: string;
   first_name: string;
@@ -111,6 +112,10 @@ export class AutenticacaoService {
     localStorage.removeItem(this.storageKey);
     this.usuarioSubject.next(null);
     this.router.navigate(['/entrar']);
+  }
+
+  obterUsuarioAtual(): UsuarioPerfil | null {
+    return this.usuarioSubject.value;
   }
 
   deveAnexarToken(urlRequisicao: string): boolean {

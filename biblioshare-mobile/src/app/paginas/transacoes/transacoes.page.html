@@ -4,33 +4,56 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-segment value="todas" class="ion-margin-bottom">
-    <ion-segment-button value="todas">
-      <ion-label>Todas</ion-label>
-    </ion-segment-button>
-    <ion-segment-button value="pendentes">
-      <ion-label>Pendentes</ion-label>
-    </ion-segment-button>
-    <ion-segment-button value="ativas">
-      <ion-label>Ativas</ion-label>
-    </ion-segment-button>
-  </ion-segment>
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="carregarTransacoes($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-  <ion-list>
-    <ion-item *ngFor="let transacao of transacoes">
+  <div class="filtros ion-padding">
+    <ion-segment [(ngModel)]="statusFiltro" (ionChange)="atualizarFiltro($event)" scrollable="true">
+      <ion-segment-button
+        *ngFor="let opcao of statusOpcoes"
+        [value]="opcao.valor"
+      >
+        <ion-label>{{ opcao.label }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+
+  <div class="estado" *ngIf="carregando">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Carregando transações...</p>
+  </div>
+
+  <div class="estado erro" *ngIf="!carregando && erroCarregamento">
+    <ion-icon name="warning-outline"></ion-icon>
+    <p>Não foi possível carregar as transações. Tente novamente.</p>
+  </div>
+
+  <div class="estado vazio" *ngIf="!carregando && !erroCarregamento && transacoesFiltradas.length === 0">
+    <ion-icon name="book-outline"></ion-icon>
+    <p>Nenhum resultado para o filtro selecionado.</p>
+  </div>
+
+  <ion-list *ngIf="!carregando && !erroCarregamento && transacoesFiltradas.length">
+    <ion-item
+      button
+      detail="true"
+      lines="full"
+      *ngFor="let transacao of transacoesFiltradas; trackBy: trackById"
+      (click)="abrirDetalhes(transacao)"
+    >
       <ion-label>
-        <h2>{{ transacao.titulo }}</h2>
-        <p>Tipo: {{ transacao.tipo }}</p>
-        <ion-badge color="tertiary">{{ transacao.status }}</ion-badge>
+        <div class="linha-principal">
+          <h2>{{ transacao.livro_principal.titulo }}</h2>
+          <ion-badge color="medium">{{ rotuloStatus(transacao.status) }}</ion-badge>
+        </div>
+        <p class="texto-discreto">Tipo: {{ rotuloTipo(transacao.tipo) }}</p>
+        <p class="texto-discreto">Contraparte: {{ contraparte(transacao) }}</p>
+        <p class="texto-discreto">
+          Atualizado em: {{ transacao.atualizado_em | date: 'dd/MM HH:mm' }}
+        </p>
       </ion-label>
-      <ion-button slot="end" fill="outline" color="primary">
-        Ações
-      </ion-button>
     </ion-item>
   </ion-list>
-
-  <ion-text color="medium">
-    <p>Fluxos de solicitação serão conectados ao backend na Fase 5.</p>
-  </ion-text>
 </ion-content>

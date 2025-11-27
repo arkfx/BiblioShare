@@ -1,0 +1,36 @@
+.estado {
+  margin: 3rem auto;
+  text-align: center;
+  color: var(--ion-color-medium);
+}
+
+.linha-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+
+  .etiqueta {
+    font-weight: 600;
+    color: var(--ion-color-medium);
+  }
+}
+
+.descricao {
+  margin: 0.25rem 0;
+  color: var(--ion-color-medium);
+}
+
+.acoes ion-button + ion-button {
+  margin-top: 0.75rem;
+}
+
+h3 {
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.secao-extra {
+  margin-top: 2rem;
+}
+

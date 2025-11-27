@@ -51,6 +51,22 @@ const routes: Routes = [
       import('./paginas/busca/busca.module').then((m) => m.BuscaPageModule),
   },
   {
+    path: 'transacoes/detalhes/:id',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./paginas/detalhes-transacao/detalhes-transacao.module').then(
+        (m) => m.DetalhesTransacaoPageModule,
+      ),
+  },
+  {
+    path: 'transacoes/propor-troca/:livroId',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./paginas/proposta-troca/proposta-troca.module').then(
+        (m) => m.PropostaTrocaPageModule,
+      ),
+  },
+  {
     path: 'transacoes',
     canActivate: [AuthGuard],
     loadChildren: () =>

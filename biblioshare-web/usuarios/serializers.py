@@ -9,6 +9,7 @@ class UsuarioPerfilSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = (
+            'id',
             'username',
             'email',
             'first_name',
@@ -19,6 +20,7 @@ class UsuarioPerfilSerializer(serializers.ModelSerializer):
             'vinculo_verificado',
         )
         read_only_fields = (
+            'id',
             'username',
             'email',
             'vinculo_verificado',

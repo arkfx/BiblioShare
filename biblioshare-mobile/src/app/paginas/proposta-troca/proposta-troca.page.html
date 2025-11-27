@@ -1,0 +1,68 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/busca"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Propor troca</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="estado" *ngIf="!livroDestino || carregandoLivros">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Preparando proposta...</p>
+  </div>
+
+  <ng-container *ngIf="livroDestino && !carregandoLivros">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>Livro desejado</ion-card-subtitle>
+        <ion-card-title>{{ livroDestino.titulo }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="descricao">{{ livroDestino.autor || 'Autor não informado' }}</p>
+        <p class="descricao">
+          Cidade: {{ livroDestino.dono_cidade || 'Não informada' }} / {{ livroDestino.dono_estado || '-' }}
+        </p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Escolha um livro do seu acervo</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="descricao">
+          Somente livros marcados como "Troca" e disponíveis aparecem na lista.
+        </p>
+        <ion-item *ngIf="livrosElegiveis.length === 0">
+          <ion-label>
+            Você não possui livros disponíveis para troca. Ajuste um item em "Meus livros".
+          </ion-label>
+        </ion-item>
+        <form [formGroup]="formulario" *ngIf="livrosElegiveis.length > 0">
+          <ion-item>
+            <ion-label position="stacked">Livro oferecido</ion-label>
+            <ion-select formControlName="livro_oferecido_id" interface="popover" placeholder="Selecione">
+              <ion-select-option *ngFor="let livro of livrosElegiveis" [value]="livro.id">
+                {{ livro.titulo }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-note color="danger" *ngIf="formulario.get('livro_oferecido_id')?.touched && formulario.get('livro_oferecido_id')?.invalid">
+            Selecione um livro para oferecer.
+          </ion-note>
+          <ion-button
+            expand="block"
+            class="ion-margin-top"
+            [disabled]="formulario.invalid || enviando"
+            (click)="submeter()"
+          >
+            Enviar proposta
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+</ion-content>
+
