@@ -10,3 +10,4 @@ class HomeView(TemplateView):
             return redirect('livros_web:vitrine')
         return super().dispatch(request, *args, **kwargs)
 
+

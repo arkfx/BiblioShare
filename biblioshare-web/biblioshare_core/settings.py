@@ -42,7 +42,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'nucleo.urls'
+ROOT_URLCONF = 'biblioshare_core.urls'
 
 TEMPLATES = [
     {
@@ -60,7 +60,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'nucleo.wsgi.application'
+WSGI_APPLICATION = 'biblioshare_core.wsgi.application'
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
@@ -144,3 +144,5 @@ EMAIL_BACKEND = os.getenv(
     'EMAIL_BACKEND',
     'django.core.mail.backends.console.EmailBackend',
 )
+
+

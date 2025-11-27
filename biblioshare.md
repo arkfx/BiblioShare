@@ -121,7 +121,7 @@ source venv/bin/activate  # Linux/Mac
 pip install django djangorestframework django-cors-headers python-dotenv pillow
 
 # Create Django project
-django-admin startproject nucleo .
+django-admin startproject biblioshare_core .
 
 # Create initial apps
 python manage.py startapp usuarios
@@ -137,7 +137,7 @@ pip freeze > requirements.txt
 
 ```
 biblioshare/
-├── nucleo/
+├── biblioshare_core/
 │   ├── __init__.py
 │   ├── settings.py
 │   ├── urls.py
@@ -182,7 +182,7 @@ biblioshare/
 
 ### 1.3 Settings Configuration
 
-The `nucleo/settings.py` must implement smart fallbacks:
+The `biblioshare_core/settings.py` must implement smart fallbacks:
 
 ```python
 import os
@@ -310,7 +310,7 @@ RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "nucleo.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "biblioshare_core.wsgi:application"]
 ```
 
 ### 1.8 Docker Compose
