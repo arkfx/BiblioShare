@@ -80,14 +80,19 @@ export class RegistroPage {
     this.autenticacaoService
       .registrar({ username, email, senha, confirmarSenha })
       .subscribe({
-        next: () => {
+        next: async () => {
           this.carregando = false;
-          this.router.navigateByUrl('/perfil', { replaceUrl: true });
+          await this.exibirToast(
+            'Conta criada! Complete seu perfil quando quiser no menu Perfil.',
+            'success',
+          );
+          this.router.navigateByUrl('/meus-livros', { replaceUrl: true });
         },
         error: async (erro) => {
           this.carregando = false;
-          await this.exibirErro(
+          await this.exibirToast(
             erro?.error?.detail ?? 'Não foi possível completar o cadastro.',
+            'danger',
           );
         },
       });
@@ -97,11 +102,14 @@ export class RegistroPage {
     this.router.navigate(['/entrar']);
   }
 
-  private async exibirErro(mensagem: string): Promise<void> {
+  private async exibirToast(
+    mensagem: string,
+    cor: 'success' | 'danger' = 'danger',
+  ): Promise<void> {
     const toast = await this.toastController.create({
       message: mensagem,
       duration: 2500,
-      color: 'danger',
+      color: cor,
     });
     await toast.present();
   }

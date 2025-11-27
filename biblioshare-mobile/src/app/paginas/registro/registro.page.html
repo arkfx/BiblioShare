@@ -64,7 +64,7 @@
         </ion-item>
         <ion-note
           color="danger"
-          *ngIf="confirmarSenha?.errors?.diferentes && (confirmarSenha?.dirty || confirmarSenha?.touched)"
+          *ngIf="confirmarSenha?.errors?.['diferentes'] && (confirmarSenha?.dirty || confirmarSenha?.touched)"
         >
           As senhas precisam ser iguais.
         </ion-note>

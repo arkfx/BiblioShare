@@ -1,0 +1,21 @@
+:host {
+  ion-menu {
+    --width: 280px;
+  }
+
+  .menu-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding-top: 0;
+  }
+
+  .menu-content__spacer {
+    flex: 1;
+  }
+
+  .menu-item--active {
+    font-weight: 600;
+    --background: rgba(56, 128, 255, 0.12);
+  }
+}

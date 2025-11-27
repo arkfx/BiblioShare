@@ -79,7 +79,7 @@
       </ion-item>
     </ion-list>
 
-    <ion-padding>
+    <div class="ion-padding">
       <ion-button expand="block" type="submit" [disabled]="salvando">
         <ion-spinner slot="start" *ngIf="salvando" name="crescent"></ion-spinner>
         Salvar alterações
@@ -87,7 +87,7 @@
       <ion-button expand="block" fill="clear" color="medium" (click)="carregarLivro()" type="button">
         Recarregar dados
       </ion-button>
-    </ion-padding>
+    </div>
   </form>
 </ion-content>
 
