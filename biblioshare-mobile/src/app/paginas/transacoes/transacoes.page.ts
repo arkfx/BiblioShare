@@ -1,5 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
 import { finalize } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
@@ -16,9 +19,11 @@ import {
 type FiltroStatus = 'TODAS' | TransacaoStatus;
 
 @Component({
+  standalone: true,
   selector: 'app-transacoes',
   templateUrl: './transacoes.page.html',
   styleUrls: ['./transacoes.page.scss'],
+  imports: [CommonModule, FormsModule, IonicModule],
 })
 export class TransacoesPage implements OnDestroy {
   transacoes: Transacao[] = [];

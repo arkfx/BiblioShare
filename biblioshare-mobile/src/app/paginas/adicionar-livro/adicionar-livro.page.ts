@@ -1,6 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NavController, ToastController } from '@ionic/angular';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { IonicModule, NavController, ToastController } from '@ionic/angular';
 import { finalize } from 'rxjs/operators';
 
 import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
@@ -9,9 +10,11 @@ import { Livro, LivroPayload } from '../../core/modelos/livros';
 import { ApiService } from '../../core/services/api.service';
 
 @Component({
+  standalone: true,
   selector: 'app-adicionar-livro',
   templateUrl: './adicionar-livro.page.html',
   styleUrls: ['./adicionar-livro.page.scss'],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule],
 })
 export class AdicionarLivroPage {
   formulario: FormGroup;

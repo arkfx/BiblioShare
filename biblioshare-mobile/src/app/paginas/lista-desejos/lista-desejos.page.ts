@@ -1,15 +1,18 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { ToastController } from '@ionic/angular';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { finalize } from 'rxjs/operators';
 
 import { ListaDesejoItem } from '../../core/modelos/livros';
 import { ApiService } from '../../core/services/api.service';
 
 @Component({
+  standalone: true,
   selector: 'app-lista-desejos',
   templateUrl: './lista-desejos.page.html',
   styleUrls: ['./lista-desejos.page.scss'],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule],
 })
 export class ListaDesejosPage {
   itens: ListaDesejoItem[] = [];

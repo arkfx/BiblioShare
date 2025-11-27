@@ -1,8 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import {
   AlertController,
   IonContent,
+  IonicModule,
   NavController,
   ToastController,
 } from '@ionic/angular';
@@ -24,9 +27,11 @@ import { ChatService } from '../../core/services/chat.service';
 type AcaoTransacao = 'aceitar' | 'recusar' | 'cancelar';
 
 @Component({
+  standalone: true,
   selector: 'app-detalhes-transacao',
   templateUrl: './detalhes-transacao.page.html',
   styleUrls: ['./detalhes-transacao.page.scss'],
+  imports: [CommonModule, FormsModule, IonicModule],
 })
 export class DetalhesTransacaoPage implements OnDestroy {
   @ViewChild(IonContent) ionContent?: IonContent;

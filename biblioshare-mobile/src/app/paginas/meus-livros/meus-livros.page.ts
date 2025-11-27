@@ -1,15 +1,18 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { finalize } from 'rxjs/operators';
 
 import { Livro } from '../../core/modelos/livros';
 import { ApiService } from '../../core/services/api.service';
 
 @Component({
+  standalone: true,
   selector: 'app-meus-livros',
   templateUrl: './meus-livros.page.html',
   styleUrls: ['./meus-livros.page.scss'],
+  imports: [CommonModule, IonicModule],
 })
 export class MeusLivrosPage {
   livros: Livro[] = [];

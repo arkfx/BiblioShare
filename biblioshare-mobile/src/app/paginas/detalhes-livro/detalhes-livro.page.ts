@@ -1,16 +1,19 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { AlertController, NavController, ToastController } from '@ionic/angular';
+import { AlertController, IonicModule, NavController, ToastController } from '@ionic/angular';
 import { finalize } from 'rxjs/operators';
 
 import { Livro, LivroPayload } from '../../core/modelos/livros';
 import { ApiService } from '../../core/services/api.service';
 
 @Component({
+  standalone: true,
   selector: 'app-detalhes-livro',
   templateUrl: './detalhes-livro.page.html',
   styleUrls: ['./detalhes-livro.page.scss'],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule],
 })
 export class DetalhesLivroPage {
   formulario: FormGroup;

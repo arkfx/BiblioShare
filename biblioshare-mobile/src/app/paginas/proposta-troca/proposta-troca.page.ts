@@ -1,16 +1,19 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NavController, ToastController } from '@ionic/angular';
+import { IonicModule, NavController, ToastController } from '@ionic/angular';
 import { finalize } from 'rxjs/operators';
 
 import { Livro } from '../../core/modelos/livros';
 import { ApiService } from '../../core/services/api.service';
 
 @Component({
+  standalone: true,
   selector: 'app-proposta-troca',
   templateUrl: './proposta-troca.page.html',
   styleUrls: ['./proposta-troca.page.scss'],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule],
 })
 export class PropostaTrocaPage {
   formulario: FormGroup;

@@ -1,5 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
@@ -18,9 +21,11 @@ interface FiltrosBusca {
 }
 
 @Component({
+  standalone: true,
   selector: 'app-busca',
   templateUrl: './busca.page.html',
   styleUrls: ['./busca.page.scss'],
+  imports: [CommonModule, FormsModule, IonicModule],
 })
 export class BuscaPage implements OnDestroy {
   livros: Livro[] = [];
