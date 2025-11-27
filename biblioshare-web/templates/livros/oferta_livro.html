@@ -8,16 +8,18 @@
 
 <div class="row g-4">
   <div class="col-lg-5">
-    <div class="card h-100">
+    <div class="card book-card book-card-lg h-100">
       {% if livro.capa_url %}
-        <img
-          src="{{ livro.capa_url }}"
-          alt="Capa do livro {{ livro.titulo }}"
-          class="card-img-top"
-          loading="lazy"
-        >
+        <div class="card-img-top card-cover-frame card-cover-frame-lg">
+          <img
+            src="{{ livro.capa_url }}"
+            alt="Capa do livro {{ livro.titulo }}"
+            class="book-cover"
+            loading="lazy"
+          >
+        </div>
       {% else %}
-        <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-muted" style="height: 320px;">
+        <div class="card-img-top card-cover-frame card-cover-frame-lg text-muted text-uppercase small fw-semibold">
           Sem capa disponível
         </div>
       {% endif %}

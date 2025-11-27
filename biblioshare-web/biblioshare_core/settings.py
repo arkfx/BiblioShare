@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     'usuarios',
     'livros',
     'transacoes',
-    'notificacoes',
 ]
 
 MIDDLEWARE = [

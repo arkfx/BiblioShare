@@ -57,19 +57,21 @@
 </form>
 
 {% if livros %}
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 row-cols-xxl-5 g-4">
     {% for livro in livros %}
       <div class="col">
-        <div class="card h-100">
+        <div class="card book-card h-100">
           {% if livro.capa_url %}
-            <img
-              src="{{ livro.capa_url }}"
-              alt="Capa do livro {{ livro.titulo }}"
-              class="card-img-top"
-              loading="lazy"
-            >
+            <div class="card-img-top card-cover-frame">
+              <img
+                src="{{ livro.capa_url }}"
+                alt="Capa do livro {{ livro.titulo }}"
+                class="book-cover"
+                loading="lazy"
+              >
+            </div>
           {% else %}
-            <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-muted" style="height: 220px;">
+            <div class="card-img-top card-cover-frame text-muted text-uppercase small fw-semibold">
               Sem capa
             </div>
           {% endif %}
